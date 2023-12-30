@@ -26,3 +26,6 @@ jobs:
 
       - name: Build Clang Debug
         run: cmake --build ${{github.workspace}}/build -j
+
+      - name: Run Tests
+        run: cmake --build ${{github.workspace}}/build --target test
