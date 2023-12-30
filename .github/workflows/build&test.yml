@@ -22,7 +22,7 @@ jobs:
           submodules: recursive
 
       - name: Configure CMake Clang Debug
-        run: cmake -G "Ninja" -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang
+        run: cmake -G "Ninja" -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang-14 -DCMAKE_CXX_COMPILER=clang++-14
 
       - name: Build Clang Debug
         run: cmake --build ${{github.workspace}}/build -j
