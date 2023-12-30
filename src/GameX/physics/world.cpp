@@ -4,7 +4,7 @@
 #include <random>
 #include <vector>
 
-#include "Gamex/physics/collision.h"
+#include "GameX/physics/collision.h"
 
 namespace GameX::Physics {
 World::World() {
