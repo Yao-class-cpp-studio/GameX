@@ -2,7 +2,7 @@
 
 namespace GameX::Base {
 
-glm::mat3 Base::Rotate(const glm::vec3 &axis, float radians) {
+glm::mat3 Rotate(const glm::vec3 &axis, float radians) {
   float c = cos(radians);
   float s = sin(radians);
   float t = 1.0f - c;
@@ -14,7 +14,7 @@ glm::mat3 Base::Rotate(const glm::vec3 &axis, float radians) {
                    t * x * z + y * s, t * y * z - x * s, t * z * z + c);
 }
 
-glm::mat3 Base::Rotate(const glm::vec3 &rotation) {
+glm::mat3 Rotate(const glm::vec3 &rotation) {
   float theta = glm::length(rotation);
   if (theta < 0.0001f) {
     return glm::mat3(1.0f);
