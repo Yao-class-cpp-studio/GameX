@@ -1,6 +1,4 @@
 #include "GameBall/logic/units/big_ball.h"
-#include "GameBall/core/game_ball.h"
-#include "GameBall/logic/world.h"
 
 namespace GameBall::Logic::Units {
 BigBall::BigBall(World *world,
@@ -39,16 +37,38 @@ SYNC_ACTOR_FUNC(BigBall) {
   actor->SetMomentOfInertia(sphere.inertia[0][0]);
 }
 
-void BigBall::ChangeSize(Sphere &sphere,float mult) {
-  float change = radius_ * (mult - 1);
-  radius_ *= mult;
+void BigBall::ChangeSize(Sphere& sphere,float rad, float mas) {
+  float change = rad-radius_;
+  float mulr = rad / radius_;
+  float mulm = mas / mass_;
+  radius_ = rad;
+  mass_ = mas;
   sphere.radius = radius_;
-  mass_ *= std::pow(mult, 3);
   sphere.mass = mass_;
-  augular_momentum_ *= std::pow(mult, 2);
-  sphere.inertia *= std::pow(mult, 2);
-  sphere.inertia_inv *= std::pow(mult, -2);
-  sphere.position += glm::vec3{0.0f,change,0.0f};
+  sphere.inertia *= (mulr*mulr*mulm);
+  sphere.inertia_inv *= (mulr * mulr * mulm);
+  sphere.position += glm::vec3{0.0f, change, 0.0f};
+}
+void BigBall::ChangeSize(Sphere &sphere,float mult) {
+  ChangeSize(sphere, radius_ * mult, mass_ * pow(mult, 3));
+}
+
+void BigBall::Split(Sphere& sphere,float mass,float rad) {
+  auto chooseid = world_->GetPlayer(enemy_id_)->PrimaryUnitId();
+  auto obj = world_->GetUnit(chooseid);
+  auto dir = dynamic_cast<Logic::Units::RegularBall *>(obj)->Position();
+  glm::vec3 mv_dir = glm::normalize(dir - position_);
+  glm::vec3 npos = position_+mv_dir*radius_/2.0f;
+   auto bullet = world_->CreateUnit<Logic::Units::Bullet>(
+      player_id_, npos,
+       rad,mass);
+  bullet->SetMotion(bullet->Position(),
+                     mv_dir * 5.0f,
+                    orientation_, glm::vec3{0.0f});
+   sphere.velocity -= bullet->Velocity()*mass/(mass_-mass);
+  sphere.angular_velocity = sphere.velocity / sphere.radius;
+   bullet->UpdateTick();
+  ChangeSize(sphere, pow((1 - mass / mass_), 1.0 / 3), mass);
 }
 
 void BigBall::UpdateTick() {
@@ -83,10 +103,20 @@ void BigBall::UpdateTick() {
       }
       if (input.add_size) {
         ChangeSize(sphere,1.1);
-        //position_+=
       }
       if (input.minus_size) {
         ChangeSize(sphere, 0.9);
+      }
+      if (input.split) {//input.split
+        uint64_t nw=world_->Version();
+        if (nw - past >= 100) {
+          std::mt19937 gen;
+          std::uniform_real_distribution<float> rd(0.5f, 1.0f);
+          float radius = rd(gen) / 1.5f*radius_;
+          float mass = mass_ * pow(radius / radius_, 3);
+          Split(sphere,mass,radius);
+          past = nw; 
+        }
       }
       if (glm::length(moving_direction) > 0.0f) {
         moving_direction = glm::normalize(moving_direction);

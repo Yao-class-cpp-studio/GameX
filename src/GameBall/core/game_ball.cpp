@@ -39,8 +39,10 @@ void GameBall::OnInit() {
   auto enemy_player = world->CreatePlayer();
   auto primary_unit = world->CreateUnit<Logic::Units::BigBall>(
       primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
-  auto enemy_unit = world->CreateUnit<Logic::Units::BigBall>(
+  auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
       enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+  printf("enemy id is %d\n",enemy_player->PlayerId() );
+  primary_unit->SetEnemy(enemy_player->PlayerId());
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
       glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 20.0f);
@@ -48,7 +50,7 @@ void GameBall::OnInit() {
   primary_player_id_ = primary_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
-
+  enemy_player->SetPrimaryUnit(enemy_unit->UnitId());
   VkExtent2D extent = FrameExtent();
   float aspect = static_cast<float>(extent.width) / extent.height;
   camera_ = scene_->CreateCamera(glm::vec3{0.0f, 10.0f, 10.0f},
