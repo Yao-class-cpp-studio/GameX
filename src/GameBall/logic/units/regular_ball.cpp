@@ -83,8 +83,47 @@ void RegularBall::UpdateTick() {
   //    }
   //  }
 
+<<<<<<< Updated upstream
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
+=======
+       if (input.sprint) {
+        sprinted = true;
+       }
+
+       if(input.ball_large){
+        sphere.radius += delta_time;
+        sphere.position += glm::vec3{0.0f, delta_time, 0.0f};
+        sphere.radius = std::min(sphere.radius, 10.0f);
+        radius_ = sphere.radius;
+        position_ = sphere.position;
+       }
+
+       if(input.ball_small){
+        sphere.radius -= delta_time;
+        sphere.radius = std::max(sphere.radius, 0.1f);
+        radius_ = sphere.radius;
+       }
+
+       if(input.mass_large){
+        sphere.mass += delta_time;
+        sphere.mass = std::min(sphere.mass, 50.0f);
+        mass_ = sphere.mass;
+       }
+
+       if(input.mass_small){
+        sphere.mass -= delta_time;
+        sphere.mass = std::max(sphere.mass, 0.1f);
+        mass_ = sphere.mass;
+       }
+     }
+   }
+
+  if (!sprinted) {
+    sphere.velocity *= std::pow(0.5f, delta_time);
+    sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  }
+>>>>>>> Stashed changes
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
