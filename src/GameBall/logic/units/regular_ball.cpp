@@ -45,7 +45,7 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  auto owner = world_->GetPlayer(player_id_);
+  /*auto owner = world_->GetPlayer(player_id_);
   if (owner) {
     if (UnitId() == owner->PrimaryUnitId()) {
       auto input = owner->TakePlayerInput();
@@ -81,7 +81,7 @@ void RegularBall::UpdateTick() {
         sphere.angular_velocity = glm::vec3{0.0f};
       }
     }
-  }
+  }*/
 
 
   sphere.velocity *= std::pow(0.5f, delta_time);
