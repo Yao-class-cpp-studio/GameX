@@ -46,6 +46,7 @@ void RegularBall::UpdateTick() {
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
    auto owner = world_->GetPlayer(player_id_);
+   bool sprinted = false;
    if (owner) {
      if (UnitId() == owner->PrimaryUnitId()) {
        auto input = owner->TakePlayerInput();
@@ -80,11 +81,17 @@ void RegularBall::UpdateTick() {
        if (input.brake) {
          sphere.angular_velocity = glm::vec3{0.0f};
        }
+
+       if (input.sprint) {
+        sprinted = true;
+       }
      }
    }
 
-  sphere.velocity *= std::pow(0.5f, delta_time);
-  sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  if (!sprinted) {
+    sphere.velocity *= std::pow(0.5f, delta_time);
+    sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  }
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
