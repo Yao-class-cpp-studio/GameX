@@ -81,6 +81,7 @@ void RegularBall::UpdateTick() {
         sphere.angular_velocity = glm::vec3{0.0f};
       }
     }
+    //?
   }
 
   sphere.velocity *= std::pow(0.5f, delta_time);
