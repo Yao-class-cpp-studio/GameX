@@ -4,7 +4,7 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/obstacles/obstacles.h"
-#include "GameBall/logic/units/units.h"
+#include "GameBall/logic/units/units.h" build
 
 void TestPlayerInput(GameBall::Logic::PlayerInput input,
                      glm::vec3 expected_position) {
