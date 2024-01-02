@@ -75,5 +75,9 @@ class GameBall : public GameX::Base::Application {
   bool ignore_next_mouse_move_{true};
 
   std::unique_ptr<Logic::PlayerInputController> player_input_controller_;
+
+ private:
+  //const int MAX_BALL_TYPES = 2;
+  //int curr_
 };
 }  // namespace GameBall

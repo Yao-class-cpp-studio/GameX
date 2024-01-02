@@ -19,4 +19,8 @@ uint64_t Unit::UnitId() const {
 uint64_t Unit::PlayerId() const {
   return player_id_;
 }
+void Unit::SetEnemy(uint64_t en) {
+  enemy_id_ = en;
+}
 }  // namespace GameBall::Logic
+
