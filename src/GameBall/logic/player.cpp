@@ -20,8 +20,16 @@ uint64_t Player::PrimaryUnitId() const {
   return primary_unit_id_;
 }
 
+uint64_t Player::EnemyUnitId() const {
+  return enemy_unit_id_;
+}
+
 void Player::SetPrimaryUnit(uint64_t unit_id) {
   primary_unit_id_ = unit_id;
+}
+
+void Player::SetEnemyUnit(uint64_t unit_id) {
+  enemy_unit_id_ = unit_id;
 }
 
 void Player::SetInput(const PlayerInput &input) {

@@ -11,7 +11,6 @@ class RegularBall : public Unit {
               const glm::vec3 &position,
               float radius = 1.0f,
               float mass = 1.0f);
-
   ~RegularBall();
 
   SYNC_ACTOR_FUNC_DECLARE(Actors::CommonBallActor)
@@ -25,6 +24,7 @@ class RegularBall : public Unit {
                  const glm::vec3 &velocity = glm::vec3{0.0f},
                  const glm::mat3 &orientation = glm::mat3{1.0f},
                  const glm::vec3 &angular_momentum = glm::vec3{0.0f});
+  void SetMotion(const char *);
 
   glm::vec3 Position() const;
   glm::vec3 Velocity() const;

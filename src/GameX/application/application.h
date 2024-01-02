@@ -10,6 +10,10 @@ struct ApplicationSettings {
   bool fullscreen{false};
   int width{-1};
   int height{-1};
+#ifdef __linux__
+  std::string mode{""}; // server or client
+  std::string address{""};
+#endif
 };
 
 class Application {
