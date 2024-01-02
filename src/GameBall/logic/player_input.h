@@ -12,6 +12,11 @@ struct PlayerInput {
   bool move_left{false};
   bool move_right{false};
   bool brake{false};
+  bool sprint{false};
+  bool ball_large{false};
+  bool ball_small{false};
+  bool mass_large{false};
+  bool mass_small{false};
   glm::vec3 orientation{0.0f, 0.0f, 1.0f};
 };
 
