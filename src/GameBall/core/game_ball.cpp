@@ -6,6 +6,30 @@
 #include "GameBall/logic/obstacles/obstacles.h"
 #include "GameBall/logic/units/units.h"
 
+#ifdef __linux__
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <list>
+#include <string.h>
+#endif
+
+namespace global{
+#ifdef __linux__
+  #define PORT 7000
+  extern int soc;
+  extern socklen_t len;
+  extern std::list<int> li;
+  extern std::string message;
+  extern struct sockaddr_in servaddr;
+  extern std::string mode;
+
+  extern void Server_getConn();
+  extern void GetData();
+
+  extern void SendMessage(std::string msg);
+#endif
+}
+
 namespace GameBall {
 
 GameBall::GameBall(const GameSettings &settings)
@@ -41,13 +65,25 @@ void GameBall::OnInit() {
       primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
       enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+#ifdef __linux__
+  if (settings_.mode == "client") {
+    auto tmp = primary_player;
+    primary_player = enemy_player;
+    enemy_player = tmp;
+    auto tmp_ = primary_unit;
+    primary_unit = enemy_unit;
+    enemy_unit = tmp_;
+  }
+#endif
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
       glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 20.0f);
 
   primary_player_id_ = primary_player->PlayerId();
+  enemy_player_id_ = enemy_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
+  enemy_player->SetEnemyUnit(enemy_unit->UnitId());
 
   VkExtent2D extent = FrameExtent();
   float aspect = static_cast<float>(extent.width) / extent.height;
@@ -60,6 +96,42 @@ void GameBall::OnInit() {
   player_input_controller_ =
       std::make_unique<Logic::PlayerInputController>(this);
 
+#ifdef __linux__
+  global::mode = settings_.mode;
+  if (settings_.mode == "server") {
+    global::soc = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&global::servaddr, 0, sizeof(global::servaddr));
+    global::servaddr.sin_family = AF_INET;
+    global::servaddr.sin_port = htons(PORT);
+    global::servaddr.sin_addr.s_addr = inet_addr(settings_.address.c_str());
+    if(bind(global::soc, (struct sockaddr* ) &global::servaddr, sizeof(global::servaddr))==-1) {
+        perror("bind");
+        exit(1);
+    }
+    if(listen(global::soc, 20) == -1) {
+        perror("listen");
+        exit(1);
+    }
+    global::len = sizeof(global::servaddr);
+    std::thread t(global::Server_getConn);
+    t.detach();
+    std::thread t1(global::GetData);
+    t1.detach();
+  }
+  if (settings_.mode == "client") {
+    global::soc = socket(AF_INET,SOCK_STREAM, 0);
+    memset(&global::servaddr, 0, sizeof(global::servaddr));
+    global::servaddr.sin_family = AF_INET;
+    global::servaddr.sin_port = htons(PORT);  
+    global::servaddr.sin_addr.s_addr = inet_addr(settings_.address.c_str());
+    if (connect(global::soc, (struct sockaddr *)&global::servaddr, sizeof(global::servaddr)) < 0){
+        perror("connect");
+        exit(1);
+    }
+    std::thread t1(global::GetData);
+    t1.detach();
+  }
+#endif
   logic_manager_->Start();
 }
 
@@ -93,6 +165,7 @@ void GameBall::OnUpdate() {
     logic_manager_->world_->SyncWorldState(this);
     primary_player_primary_unit_object_id_ = 0;
     auto primary_player = logic_manager_->world_->GetPlayer(primary_player_id_);
+    auto enemy_player = logic_manager_->world_->GetPlayer(enemy_player_id_);
     if (primary_player) {
       auto primary_unit =
           logic_manager_->world_->GetUnit(primary_player->PrimaryUnitId());
@@ -100,6 +173,14 @@ void GameBall::OnUpdate() {
         primary_player_primary_unit_object_id_ = primary_unit->ObjectId();
       }
       primary_player->SetInput(player_input);
+    }
+    if (enemy_player) {
+      auto enemy_unit =
+          logic_manager_->world_->GetUnit(enemy_player->PrimaryUnitId());
+      if (enemy_unit) {
+        enemy_player_primary_unit_object_id_ = enemy_unit->ObjectId();
+      }
+      enemy_player->SetInput(player_input);
     }
   }
 

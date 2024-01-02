@@ -13,6 +13,10 @@ struct PlayerInput {
   bool move_right{false};
   bool brake{false};
   glm::vec3 orientation{0.0f, 0.0f, 1.0f};
+
+  operator std::string() const;
+  PlayerInput(){}
+  PlayerInput(std::string);
 };
 
 class PlayerInputController {
