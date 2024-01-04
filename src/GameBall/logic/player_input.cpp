@@ -8,6 +8,7 @@ PlayerInputController::PlayerInputController(GameBall *app) : app_(app) {
 
 PlayerInput PlayerInputController::GetInput() {
   auto window = app_->Window();
+  input_.speed_up = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
   input_.move_forward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
   input_.move_backward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
   input_.move_left = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
