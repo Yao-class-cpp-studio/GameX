@@ -44,7 +44,6 @@ void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
-  //The following are implemented
     auto owner = world_->GetPlayer(player_id_);
     if (owner) {
       if (UnitId() == owner->PrimaryUnitId()) {
@@ -82,7 +81,6 @@ void RegularBall::UpdateTick() {
         }
       }
     }
-  //end
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
