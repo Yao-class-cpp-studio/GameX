@@ -40,6 +40,7 @@ SYNC_ACTOR_FUNC(RegularBall) {
   actor->SetMomentOfInertia(sphere.inertia[0][0]);
 }
 
+bool no_damp = false;
 void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
@@ -70,21 +71,62 @@ void RegularBall::UpdateTick() {
       if (input.move_right) {
         moving_direction += forward;
       }
+      if (input.jump) {
+        sphere.velocity += glm::vec3{0.0f, 10.0f, 0.0f};
+      }
 
       if (glm::length(moving_direction) > 0.0f) {
         moving_direction = glm::normalize(moving_direction);
+        moving_direction += glm::normalize(moving_direction);
+        if (input.speed) {
+          sphere.angular_velocity +=
+               moving_direction * angular_acceleration * delta_time;
+        }
         sphere.angular_velocity +=
             moving_direction * angular_acceleration * delta_time;
+      }
+      if (input.large) {
+        sphere.radius += delta_time;
+        sphere.position += glm::vec3{0.0f, delta_time, 0.0f};
+        sphere.radius = std::min(sphere.radius, 10.0f);
+        radius_ = sphere.radius;
+        position_ = sphere.position;
+      }
+
+      if (input.small) {
+        sphere.radius -= delta_time;
+        sphere.radius = std::max(sphere.radius, 0.1f);
+        radius_ = sphere.radius;
+      }
+
+      if (input.heavy) {
+        sphere.mass += delta_time;
+        sphere.mass = std::min(sphere.mass, 50.0f);
+        mass_ = sphere.mass;
+      }
+
+      if (input.light) {
+        sphere.mass -= delta_time;
+        sphere.mass = std::max(sphere.mass, 0.1f);
+        mass_ = sphere.mass;
       }
 
       if (input.brake) {
         sphere.angular_velocity = glm::vec3{0.0f};
       }
+
+      if (input.no_damping)
+        no_damp = true;
+      if (input.damping)
+        no_damp = false;
+      
     }
   }
 
-  sphere.velocity *= std::pow(0.5f, delta_time);
-  sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  if (!no_damp) {
+    sphere.velocity *= std::pow(0.5f, delta_time);
+    sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  }
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
