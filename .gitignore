@@ -5,3 +5,4 @@ cmake-build-*
 .vs
 vcpkg_installed
 imgui.ini
+CMakeSettings.json
