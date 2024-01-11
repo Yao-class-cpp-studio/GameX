@@ -45,32 +45,50 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-    auto owner = world_->GetPlayer(player_id_);
-    if (owner) {
-      if (UnitId() == owner->PrimaryUnitId()) {
-        auto input = owner->TakePlayerInput();
+  // Check if the ball has fallen into the void
+  if (position_.y < -10.0f) {
+    position_ =
+        glm::vec3{0.0f, 1.0f, 0.0f};
+    sphere.position = position_;
+    velocity_ = glm::vec3{0.0f};
+    sphere.velocity = velocity_;
+    augular_momentum_ = glm::vec3{0.0f};
+    sphere.angular_velocity = sphere.inertia_inv * augular_momentum_;
+  }
 
-        glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-        glm::vec3 right =
-            glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId()) {
+      auto input = owner->TakePlayerInput();
 
-        glm::vec3 moving_direction{};
+      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+      glm::vec3 right =
+          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
 
-        float angular_acceleration = glm::radians(2880.0f);
+      glm::vec3 moving_direction{};
 
-        if (input.move_forward) {
-          moving_direction -= right;
-        }
-        if (input.move_backward) {
-          moving_direction += right;
-        }
-        if (input.move_left) {
-          moving_direction -= forward;
-        }
-        if (input.move_right) {
-          moving_direction += forward;
-        }
+      float angular_acceleration = glm::radians(2880.0f);
 
+      if (input.move_forward) {
+        moving_direction -= right;
+      }
+      if (input.move_backward) {
+        moving_direction += right;
+      }
+      if (input.move_left) {
+        moving_direction -= forward;
+      }
+      if (input.move_right) {
+        moving_direction += forward;
+      }
+
+      if (input.jump) {
+        if(sphere.position.y < 1.01f && sphere.position.y > 0.99f)
+          sphere.velocity.y += 4.0f;  // Adjust the force as needed
+      }
+
+      // Only update angular velocity when the ball is grounded
+      if (sphere.position.y < 1.01f && sphere.position.y > 0.99f) {
         if (glm::length(moving_direction) > 0.0f) {
           moving_direction = glm::normalize(moving_direction);
           sphere.angular_velocity +=
@@ -82,14 +100,19 @@ void RegularBall::UpdateTick() {
         }
       }
     }
+  }
 
   sphere.velocity *= std::pow(0.5f, delta_time);
-  sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  // Only update angular velocity when the ball is grounded
+  if (sphere.position.y < 1.01f && sphere.position.y > 0.99f) {
+    sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  }
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
+  //std::cerr << "position: " << position_.x << ", " << position_.y << ", "<< position_.z << std::endl;
 }
 
 void RegularBall::SetMass(float mass) {

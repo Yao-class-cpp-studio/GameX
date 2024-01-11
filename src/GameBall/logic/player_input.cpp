@@ -19,6 +19,16 @@ PlayerInput PlayerInputController::GetInput() {
   auto yaw = pitch_yaw.y;
   input_.orientation = {glm::sin(glm::radians(yaw)), 0.0f,
                         -glm::cos(glm::radians(yaw))};
+
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && input_.jump_released) {
+    input_.jump = true;
+    input_.jump_released = false;
+  } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS) {
+    input_.jump_released = true;
+  } else {
+    input_.jump = false;
+  }
+
   auto result = input_;
   input_ = {};
   return result;
