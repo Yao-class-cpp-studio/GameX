@@ -39,7 +39,7 @@ class Renderer {
     return depth_render_pass_.get();
   }
 
-  RenderPipeline *RenderPipeline() const {
+  class RenderPipeline *RenderPipeline() const {
     return render_pipeline_.get();
   }
 
