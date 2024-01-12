@@ -8,10 +8,10 @@ PlayerInputController::PlayerInputController(GameBall *app) : app_(app) {
 
 PlayerInput PlayerInputController::GetInput() {
   auto window = app_->Window();
-  input_.move_forward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
-  input_.move_backward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
-  input_.move_left = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
-  input_.move_right = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) || (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
+  input_.move_forward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) | (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+  input_.move_backward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) | (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
+  input_.move_left = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) | (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
+  input_.move_right = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) | (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
   input_.brake = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
   auto camera_controller = app_->CameraController();
   auto pitch_yaw = camera_controller->GetPitchYaw();
