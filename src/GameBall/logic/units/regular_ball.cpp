@@ -44,7 +44,7 @@ void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
-
+//changed here
   auto owner = world_->GetPlayer(player_id_);
   if (owner) {
   if (UnitId() == owner->PrimaryUnitId()) {
