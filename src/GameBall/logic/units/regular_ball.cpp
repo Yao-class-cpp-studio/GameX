@@ -144,4 +144,4 @@ glm::vec3 RegularBall::AngularMomentum() const {
   return augular_momentum_;
 }
 
-} namespace GameBall::Logic::Units
+} //namespace GameBall::Logic::Units
