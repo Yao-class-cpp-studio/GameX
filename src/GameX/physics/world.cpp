@@ -91,6 +91,6 @@ void World::ApplyGravity(float delta_time) {
   }
 }
 void World::GetScore(){
-  printf(%lu,score_);
+  printf("%lu",score_);
 }
 }  // namespace GameX::Physics
