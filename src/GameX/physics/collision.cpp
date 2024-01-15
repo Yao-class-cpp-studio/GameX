@@ -1,6 +1,9 @@
 #include "GameX/physics/collision.h"
-
+#include <Windows.h>
+#include <mmsystem.h>
 #include <iostream>
+#pragma comment (lib,"winmm.lib")
+
 
 namespace GameX::Physics {
 
@@ -164,7 +167,10 @@ bool SolveCollision(RigidBody &body1,
     body2.angular_velocity +=
         inverse_inertia2 * glm::cross(r2, friction_impulse);
   }
-
+if (0 == PlaySound(TEXT("BANG.mp3"), NULL, SND_FILENAME | SND_ASYNC))
+	{
+		printf("playsound false");
+	}
   return true;
 }
 
