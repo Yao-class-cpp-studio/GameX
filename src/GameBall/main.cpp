@@ -12,7 +12,7 @@ ABSL_FLAG(bool, fullscreen, false, "Run in fullscreen mode.");
 // Width and Height
 ABSL_FLAG(int, width, -1, "Width of the window.");
 ABSL_FLAG(int, height, -1, "Height of the window.");
-ABSL_FLAG(std::string, mode, "", "Game mode");
+ABSL_FLAG(std::string, mode, "local", "Game mode");
 ABSL_FLAG(std::string, address, "", "Server address");
 ABSL_FLAG(int, port, DEFAULT_PORT, "Server Port");
 
