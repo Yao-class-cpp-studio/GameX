@@ -91,6 +91,6 @@ void World::ApplyGravity(float delta_time) {
   }
 }
 void World::GetScore(){
-  std::cout<<score_;
+  printf(%u,score_);
 }
 }  // namespace GameX::Physics
