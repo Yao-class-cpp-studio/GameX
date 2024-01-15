@@ -22,7 +22,7 @@
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
 
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -44,7 +44,7 @@ class P2PNode {
 
 #ifdef _WIN32
   SOCKET sockfd;
-#elif __APPLE__
+#elif __APPLE__ || __linux__
   int sockfd;
 #endif
   bool is_initialized;

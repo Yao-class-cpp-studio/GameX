@@ -102,7 +102,7 @@ bool P2PNode::isInited() const {
   return is_initialized;
 }
 
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 P2PNode::P2PNode() : is_initialized(false), is_server(false), sockfd(-1) {}
 
@@ -182,8 +182,6 @@ void P2PNode::closeConnection() {
 bool P2PNode::isInited() const {
   return is_initialized;
 }
-#elif __linux__
-// Linux implementation
 #else
 // Other OS implementation
 #endif
@@ -218,7 +216,7 @@ std::vector<std::string> getLocalIPs() {
 
   return ips;
 }
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 #define NI_MAXHOST 1025
 // macOS implementation
@@ -253,7 +251,6 @@ std::vector<std::string> getLocalIPs() {
   freeifaddrs(ifaddr);
   return ips;
 }
-#elif __linux__
 // Linux implementation
 #else
 // Other OS implementation
