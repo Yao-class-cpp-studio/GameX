@@ -70,7 +70,7 @@ void RegularBall::UpdateTick() {
         if (input.move_right) {
           moving_direction += forward;
         }
-  
+        
         if (glm::length(moving_direction) > 0.0f) {
           moving_direction = glm::normalize(moving_direction);
           sphere.angular_velocity +=
@@ -80,9 +80,13 @@ void RegularBall::UpdateTick() {
         if (input.brake) {
           sphere.angular_velocity = glm::vec3{0.0f};
         }
+        if (input.resize)
+        {
+           sphere.position = glm::vec3{0.0f, 1.0f, 0.0f}; 
+           sphere.velocity = glm::vec3{0.0f}; 
+        }
       }
     }
-
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
