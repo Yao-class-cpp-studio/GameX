@@ -8,6 +8,7 @@
 #include "GameBall/logic/obstacle.h"
 #include "GameBall/logic/player.h"
 #include "GameBall/logic/unit.h"
+#include "GameBall/core/p2pnode.h"
 
 namespace GameBall::Logic {
 class Manager;
@@ -90,6 +91,8 @@ class World {
   }
 
   void UpdateTick();
+
+  P2PNode game_node_;
 
  private:
   friend ::GameBall::GameBall;

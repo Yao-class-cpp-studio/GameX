@@ -45,10 +45,9 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  // Check if the ball has fallen into the void
   if (position_.y < -10.0f) {
     position_ =
-        glm::vec3{0.0f, 1.0f, 0.0f};
+        glm::vec3{0.0f, 10.0f, 0.0f};
     sphere.position = position_;
     velocity_ = glm::vec3{0.0f};
     sphere.velocity = velocity_;
@@ -84,7 +83,7 @@ void RegularBall::UpdateTick() {
 
       if (input.jump) {
         if(sphere.position.y < 1.01f && sphere.position.y > 0.99f)
-          sphere.velocity.y += 4.0f;  // Adjust the force as needed
+          sphere.velocity.y += 6.0f;  // Adjust the force as needed
       }
 
       // Only update angular velocity when the ball is grounded
@@ -112,7 +111,6 @@ void RegularBall::UpdateTick() {
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
-  //std::cerr << "position: " << position_.x << ", " << position_.y << ", "<< position_.z << std::endl;
 }
 
 void RegularBall::SetMass(float mass) {
