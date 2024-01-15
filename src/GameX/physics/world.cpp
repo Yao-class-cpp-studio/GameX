@@ -72,8 +72,10 @@ void World::SolveCollisions() {
   do {
     collision_found = false;
     for (auto &pair : collision_pairs) {
-      if (SolveCollision(*std::get<0>(pair), *std::get<1>(pair),
-                         std::get<2>(pair))) {
+      uint64_t k = SolveCollision(*std::get<0>(pair), *std::get<1>(pair),
+                         std::get<2>(pair));
+      score_ += k;
+      if(k!=0){
         collision_found = true;
       }
     }
@@ -87,5 +89,8 @@ void World::ApplyGravity(float delta_time) {
   for (auto &cube : cubes_) {
     cube.second.velocity += cube.second.gravity * delta_time;
   }
+}
+void World::GetScore(){
+  printf("%lu",score_);
 }
 }  // namespace GameX::Physics

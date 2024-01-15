@@ -23,10 +23,12 @@ class World {
 
   void ApplyGravity(float delta_time);
 
+  void GetScore();
  private:
   std::map<uint64_t, Sphere> spheres_;
   uint64_t next_sphere_id_{1};
   std::map<uint64_t, Cube> cubes_;
   uint64_t next_cube_id_{1};
+  uint64_t score_=0;
 };
 }  // namespace GameX::Physics

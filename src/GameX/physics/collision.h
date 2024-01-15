@@ -19,7 +19,7 @@ bool DetectCollision(const Sphere &sphere,
                      const Cube &cube,
                      Collision &collision);
 
-bool SolveCollision(RigidBody &body1,
+uint64_t SolveCollision(RigidBody &body1,
                     RigidBody &body2,
                     const Collision &collision);
 

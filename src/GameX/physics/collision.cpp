@@ -68,7 +68,7 @@ bool DetectCollision(const Sphere &sphere,
   return true;
 }
 
-bool SolveCollision(RigidBody &body1,
+uint64_t SolveCollision(RigidBody &body1,
                     RigidBody &body2,
                     const Collision &collision) {
   //  std::cout << "Solve Collision..." << std::endl;
@@ -103,8 +103,9 @@ bool SolveCollision(RigidBody &body1,
       body2.velocity + glm::cross(body2.angular_velocity, r2) - body1.velocity -
       glm::cross(body1.angular_velocity, r1);
   float velocity_along_normal = glm::dot(relative_velocity, collision.normal);
+  uint64_t addscore=10000*velocity_along_normal;
   if (velocity_along_normal > -0.0001f) {
-    return false;
+    return 0;
   }
 
   glm::mat3 inverse_inertia1 =
@@ -165,7 +166,7 @@ bool SolveCollision(RigidBody &body1,
         inverse_inertia2 * glm::cross(r2, friction_impulse);
   }
 
-  return true;
+  return addscore;
 }
 
 }  // namespace GameX::Physics
