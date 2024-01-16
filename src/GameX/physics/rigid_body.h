@@ -9,6 +9,7 @@ struct RigidBody {
   glm::mat3 inertia{1.0f};      // inertia tensor without orientation
   glm::mat3 inertia_inv{1.0f};  // inverse inertia tensor without orientation
   glm::vec3 position{0.0f};
+  glm::vec3 ini_position{0.0f};
   glm::vec3 velocity{0.0f};
   glm::vec3 angular_velocity{0.0f};
   glm::mat3 orientation{1.0f};
