@@ -53,7 +53,7 @@ void RegularBall::UpdateTick() {
   
         glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
         glm::vec3 right =
-            glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));l
+            glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
   
         glm::vec3 moving_direction{};
   
