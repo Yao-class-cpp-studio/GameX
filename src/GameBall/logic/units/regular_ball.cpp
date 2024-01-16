@@ -17,6 +17,7 @@ RegularBall::RegularBall(World *world,
   sphere_id_ = physics_world->CreateSphere();
   auto &sphere = physics_world->GetSphere(sphere_id_);
   sphere.position = position_;
+  sphere.ini_position = position_;
   sphere.SetRadiusMass(radius_, mass_);
   sphere.orientation = orientation_;
   sphere.velocity = velocity_;
