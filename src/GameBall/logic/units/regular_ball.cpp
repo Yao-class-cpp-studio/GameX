@@ -102,25 +102,14 @@ void RegularBall::UpdateTick() {
           exit(0);
         }
         if (input.halt) {
-          std::cout << "Enter a 4-digit password:\n";
-          std::string password, enter;
-          int length = 4, i = 0;
-          char p;
-          while (i < length) {
-            password += getch();
-            i++;
-          }
-          std::cout << "Successfully memorized password. Please enter it again "
-                       "to return:\n";
-          while (1) {
-            std::cin >> enter;
-            if (enter == password) {
-              input.halt = false;
-              break;
-            }
-            std::cout << "enter password again:";
-          }
+          std::cout << "Halting¡­¡­\n";
+          std::cout << "Press Enter to restart the game:";
+          getchar();
         }
+      } else {
+        glm::vec3 zero_v{0.0f};
+        sphere.velocity = zero_v;
+        sphere.angular_velocity *= 0;
       }
       if (input.end)
         exit(0);

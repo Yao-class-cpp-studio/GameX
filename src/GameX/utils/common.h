@@ -1,8 +1,6 @@
 #pragma once
 #include <grassland/grassland.h>
-#include<conio.h>
 #include <set>
-
 #define GAMEX_DECLARE_CLASS(ClassName)             \
   class ClassName;                                 \
   typedef std::unique_ptr<ClassName> U##ClassName; \
