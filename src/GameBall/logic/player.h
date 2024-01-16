@@ -12,7 +12,11 @@ class Player {
 
   uint64_t PrimaryUnitId() const;
 
+  uint64_t EnemyUnitId() const;
+
   void SetPrimaryUnit(uint64_t unit_id);
+
+  void SetEnemyUnit(uint64_t unit_id);
 
   void SetInput(const PlayerInput &input);
 
@@ -25,6 +29,8 @@ class Player {
   uint64_t player_id_{};
 
   uint64_t primary_unit_id_{};
+
+  uint64_t enemy_unit_1_id_{};
 
   PlayerInput input_{};
 };
