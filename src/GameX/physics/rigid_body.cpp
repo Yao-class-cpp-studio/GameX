@@ -5,7 +5,7 @@ namespace GameX::Physics {
 
 void RigidBody::Update(float delta_time) {
   position += velocity * delta_time;
-  if (position.y < -10.0) {
+  if (position.y < -25.0) {
     position = ini_position + glm::vec3{0.0f, 5.0f, 0.0f};
     velocity = glm::vec3{0.0f, 0.0f, 0.0f};
     angular_velocity = glm::vec3{0.0f, 0.0f, 0.0f};
