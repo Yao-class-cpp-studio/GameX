@@ -34,4 +34,26 @@ PlayerInput PlayerInputController::GetInput() {
   return result;
 }
 
+bool operator==(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs) {
+  // Compare each member of Logic::PlayerInput
+  return lhs.move_forward == rhs.move_forward
+         && lhs.move_backward == rhs.move_backward
+         && lhs.move_left == rhs.move_left
+         && lhs.move_right == rhs.move_right
+         && lhs.brake == rhs.brake
+         && lhs.jump == rhs.jump
+         && lhs.jump_released == rhs.jump_released;
+}
+
+bool operator!=(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs) {
+  // Compare each member of Logic::PlayerInput
+  return lhs.move_forward != rhs.move_forward
+         || lhs.move_backward != rhs.move_backward
+         || lhs.move_left != rhs.move_left
+         || lhs.move_right != rhs.move_right
+         || lhs.brake != rhs.brake
+         || lhs.jump != rhs.jump
+         || lhs.jump_released != rhs.jump_released;
+}
+
 }  // namespace GameBall::Logic

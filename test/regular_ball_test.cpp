@@ -6,6 +6,8 @@
 #include "GameBall/logic/obstacles/obstacles.h"
 #include "GameBall/logic/units/units.h"
 
+bool is_server = true;
+
 void TestPlayerInput(GameBall::Logic::PlayerInput input,
                      glm::vec3 expected_position) {
   GameBall::Logic::World world;

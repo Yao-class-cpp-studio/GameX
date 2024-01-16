@@ -3,6 +3,8 @@
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
 
+extern bool is_server;
+
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
@@ -27,7 +29,6 @@ RegularBall::RegularBall(World *world,
 }
 
 RegularBall::~RegularBall() {
-  ;
 }
 
 SYNC_ACTOR_FUNC(RegularBall) {
@@ -44,62 +45,64 @@ void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
+  if(is_server){
+    if (position_.y < -10.0f) {
+      position_ =
+          glm::vec3{0.0f, 10.0f, 0.0f};
+      sphere.position = position_;
+      velocity_ = glm::vec3{0.0f};
+      sphere.velocity = velocity_;
+      augular_momentum_ = glm::vec3{0.0f};
+      sphere.angular_velocity = sphere.inertia_inv * augular_momentum_;
+    }
 
-  if (position_.y < -10.0f) {
-    position_ =
-        glm::vec3{0.0f, 10.0f, 0.0f};
-    sphere.position = position_;
-    velocity_ = glm::vec3{0.0f};
-    sphere.velocity = velocity_;
-    augular_momentum_ = glm::vec3{0.0f};
-    sphere.angular_velocity = sphere.inertia_inv * augular_momentum_;
-  }
+    auto owner = world_->GetPlayer(player_id_);
+    if (owner) {
+      if (UnitId() == owner->PrimaryUnitId()) {
+        auto input = owner->PlayerId() == 1 ? owner->TakePlayerInput() : owner->GetPlayerInput();
 
-  auto owner = world_->GetPlayer(player_id_);
-  if (owner) {
-    if (UnitId() == owner->PrimaryUnitId()) {
-      auto input = owner->TakePlayerInput();
+        glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+        glm::vec3 right =
+            glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
 
-      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-      glm::vec3 right =
-          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+        glm::vec3 moving_direction{};
 
-      glm::vec3 moving_direction{};
+        float angular_acceleration = glm::radians(2880.0f);
 
-      float angular_acceleration = glm::radians(2880.0f);
-
-      if (input.move_forward) {
-        moving_direction -= right;
-      }
-      if (input.move_backward) {
-        moving_direction += right;
-      }
-      if (input.move_left) {
-        moving_direction -= forward;
-      }
-      if (input.move_right) {
-        moving_direction += forward;
-      }
-
-      if (input.jump) {
-        if(sphere.position.y < 1.01f && sphere.position.y > 0.99f)
-          sphere.velocity.y += 6.0f;  // Adjust the force as needed
-      }
-
-      // Only update angular velocity when the ball is grounded
-      if (sphere.position.y < 1.01f && sphere.position.y > 0.99f) {
-        if (glm::length(moving_direction) > 0.0f) {
-          moving_direction = glm::normalize(moving_direction);
-          sphere.angular_velocity +=
-              moving_direction * angular_acceleration * delta_time;
+        if (input.move_forward) {
+          moving_direction -= right;
+        }
+        if (input.move_backward) {
+          moving_direction += right;
+        }
+        if (input.move_left) {
+          moving_direction -= forward;
+        }
+        if (input.move_right) {
+          moving_direction += forward;
         }
 
-        if (input.brake) {
-          sphere.angular_velocity = glm::vec3{0.0f};
+        if (input.jump) {
+          if(sphere.position.y < 1.01f && sphere.position.y > 0.99f)
+            sphere.velocity.y += 6.0f;  // Adjust the force as needed
+        }
+
+        // Only update angular velocity when the ball is grounded
+        if (sphere.position.y < 1.01f && sphere.position.y > 0.99f) {
+          if (glm::length(moving_direction) > 0.0f) {
+            moving_direction = glm::normalize(moving_direction);
+            sphere.angular_velocity +=
+                moving_direction * angular_acceleration * delta_time;
+          }
+
+          if (input.brake) {
+            sphere.angular_velocity = glm::vec3{0.0f};
+          }
         }
       }
     }
   }
+
 
   sphere.velocity *= std::pow(0.5f, delta_time);
   // Only update angular velocity when the ball is grounded
@@ -163,6 +166,11 @@ glm::mat3 RegularBall::Orientation() const {
 
 glm::vec3 RegularBall::AngularMomentum() const {
   return augular_momentum_;
+}
+void RegularBall::setAngularMomentum(const glm::f32 a, const glm::f32 b, const glm::f32 c) {
+  augular_momentum_[0] = a;
+  augular_momentum_[1] = b;
+  augular_momentum_[2] = c;
 }
 
 }  // namespace GameBall::Logic::Units

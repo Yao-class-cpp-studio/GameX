@@ -12,6 +12,10 @@ CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
 }
 
 CommonBallActor::~CommonBallActor() {
+  if (entity_) {
+    app_->Scene()->DestroyEntity(entity_.get());
+    entity_ = nullptr;
+  }
 }
 
 void CommonBallActor::Update(float delta_time) {
