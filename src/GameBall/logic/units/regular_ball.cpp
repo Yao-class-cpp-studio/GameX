@@ -21,8 +21,8 @@ RegularBall::RegularBall(World *world,
   sphere.orientation = orientation_;
   sphere.velocity = velocity_;
   sphere.angular_velocity = glm::vec3{0.0f};
-  sphere.elasticity = 1.0f;
-  sphere.friction = 10.0f;
+  sphere.elasticity = sphere.elasticities[sphere.type];
+  sphere.friction = sphere.frictions[sphere.type];
   sphere.gravity = glm::vec3{0.0f, -9.8f, 0.0f};
 }
 
@@ -33,20 +33,23 @@ RegularBall::~RegularBall() {
 SYNC_ACTOR_FUNC(RegularBall) {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
-  actor->SetMass(1.0f);
+  actor->SetMass(sphere.masses[sphere.type]);
   actor->SetGravity(glm::vec3{0.0f, -9.8f, 0.0f});
   actor->SetTransform(glm::mat3{radius_});
   actor->SetMotion(position_, velocity_, orientation_, augular_momentum_);
   actor->SetMomentOfInertia(sphere.inertia[0][0]);
 }
 
+long double last_change_time = -1, cur_time = 0;
 void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
+  cur_time += delta_time;
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
   bool speed_up = false;
-
+  float delta_v = 0.5f, delta_av = 0.2f;
   auto owner = world_->GetPlayer(player_id_);
+
   if (owner) {
     if (UnitId() == owner->PrimaryUnitId()) {
       auto input = owner->TakePlayerInput();
@@ -71,6 +74,14 @@ void RegularBall::UpdateTick() {
       if (input.move_right) {
         moving_direction += forward;
       }
+      if (input.left_arrow && (cur_time-last_change_time>=1.0)) {
+        sphere.type = (sphere.type - 1) < 0 ? 2 : (sphere.type - 1);
+        last_change_time = cur_time;
+      }
+      if (input.right_arrow && (cur_time-last_change_time>=1.0)) {
+        sphere.type = (sphere.type + 1) % 3;
+        last_change_time = cur_time;
+      }
       speed_up = input.speed_up;
 
       if (glm::length(moving_direction) > 0.0f) {
@@ -80,16 +91,21 @@ void RegularBall::UpdateTick() {
       }
 
       if (input.brake) {
-        sphere.angular_velocity = glm::vec3{0.0f};
+        sphere.angular_velocity *= 0.7f;
+        speed_up = false;
       }
     }
   }
 
-  float delta_v = 0.5f, delta_av = 0.2f;
   if (speed_up)
     delta_v *= 3.0f, delta_av *= 3.0f;
   sphere.velocity *= std::pow(delta_v, delta_time);
   sphere.angular_velocity *= std::pow(delta_av, delta_time);
+  sphere.elasticity = sphere.elasticities[sphere.type];
+  sphere.friction = sphere.frictions[sphere.type];
+  sphere.mass = sphere.masses[sphere.type];
+
+
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
