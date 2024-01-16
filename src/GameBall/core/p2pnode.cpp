@@ -47,7 +47,7 @@ void P2PNode::initialize(int port) {
   is_initialized = true;
 }
 
-void P2PNode::send(const std::string& message, const std::string& ip, int port) const {
+void P2PNode::send(const std::string& message, const std::string& ip, uint16_t port) const {
   if (!is_initialized) {
     printf("Node is not initialized.\n");
     return;
@@ -63,7 +63,7 @@ void P2PNode::send(const std::string& message, const std::string& ip, int port) 
          (struct sockaddr *)&dest_addr, sizeof(dest_addr));
 }
 
-std::tuple<std::string, std::string, int> P2PNode::receive() {
+std::tuple<std::string, std::string, uint16_t> P2PNode::receive() {
   if (!is_initialized) {
     printf("Node is not initialized.\n");
     return std::make_tuple("", "", 0);
