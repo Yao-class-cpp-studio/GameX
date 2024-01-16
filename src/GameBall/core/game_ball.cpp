@@ -138,8 +138,16 @@ void GameBall::OnUpdate() {
   }
 
   auto actor = GetActor(primary_player_primary_unit_object_id_);
-  if (actor) {
+  auto actor1 = GetActor(enemy_player_enemy_unit_object_id_);
+  if (actor && actor1) {
+    auto temp = glm::vec3{(actor->Position().x + actor1->Position().x) / 2,
+                          (actor->Position().y + actor1->Position().y) / 2,
+                          (actor->Position().z + actor1->Position().z) / 2};
+    camera_controller_->SetCenter(temp);
+  } else if (actor) {
     camera_controller_->SetCenter(actor->Position());
+  } else {
+    camera_controller_->SetCenter(actor1->Position());
   }
   camera_controller_->Update(delta_time);
 }
