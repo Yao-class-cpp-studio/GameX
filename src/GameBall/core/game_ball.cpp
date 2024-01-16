@@ -37,6 +37,8 @@ void GameBall::OnInit() {
 
   auto primary_player = world->CreatePlayer();
   auto enemy_player = world->CreatePlayer();
+  primary_player->is_enemy = false;
+  enemy_player->is_enemy = true;
   auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
       primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(

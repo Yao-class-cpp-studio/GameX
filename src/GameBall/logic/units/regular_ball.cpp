@@ -2,6 +2,7 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
+// #include "GameBall/logic/units/settlement.h"
 
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
@@ -45,47 +46,89 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-   auto owner = world_->GetPlayer(player_id_);
-   if (owner) {
-     if (UnitId() == owner->PrimaryUnitId()) {
-       auto input = owner->TakePlayerInput();
-  
-       glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-       glm::vec3 right =
-           glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
-  
-       glm::vec3 moving_direction{};
-  
-       float angular_acceleration = glm::radians(2880.0f);
-  
-       if (input.move_forward) {
-         moving_direction -= right;
-       }
-       if (input.move_backward) {
-         moving_direction += right;
-       }
-       if (input.move_left) {
-         moving_direction -= forward;
-       }
-       if (input.move_right) {
-         moving_direction += forward;
-       }
-  
-       if (glm::length(moving_direction) > 0.0f) {
-         moving_direction = glm::normalize(moving_direction);
-         sphere.angular_velocity +=
-             moving_direction * angular_acceleration * delta_time;
-       }
-  
-       if (input.brake) {
-         sphere.angular_velocity = glm::vec3{0.0f};
-       }
-     }
-   }
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId()) {
+      auto input = owner->TakePlayerInput();
+
+      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+      glm::vec3 right =
+          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+      glm::vec3 z_rotate_speed =
+          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 0.0f, 1.0f}));
+
+      glm::vec3 moving_direction{};
+
+      float angular_acceleration = glm::radians(2880.0f);
+
+      if (input.move_forward) {
+        moving_direction -= right;
+      }
+      if (input.move_backward) {
+        moving_direction += right;
+      }
+      if (input.move_left) {
+        moving_direction -= forward;
+      }
+      if (input.move_right) {
+        moving_direction += forward;
+      }
+      if (input.rotate_z) {
+        moving_direction += z_rotate_speed;
+      }
+      if (input.move_up) {
+        if (jump == 1 && sphere.velocity.y < 0) {
+          sphere.velocity.y = 5;
+          jump++;
+          // std::cout << "double jump" << std::endl;
+        } else if (jump == 0) {
+          sphere.velocity.y += 3.5;
+          jump++;
+          // std::cout << "first jump" << std::endl;
+        }
+        // std::cout << sphere.velocity.y << " " << sphere.position.y <<
+        // std::endl;
+      }
+      if (glm::length(moving_direction) > 0.0f) {
+        moving_direction = glm::normalize(moving_direction);
+        sphere.angular_velocity +=
+            moving_direction * angular_acceleration * delta_time;
+      }
+
+      if (input.brake) {
+        sphere.angular_velocity = glm::vec3{0.0f};
+      }
+    }
+  }
 
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
+  position_ = sphere.position;
+  if (position_.y < -30) {
+    if (owner->is_enemy) {
+      std::cout << "you win\n";
+      sphere.position = glm::vec3{-5.0f, 1.0f, 0.0f};
+      world_->restart = 1;
+      world_->score[0]++;
+    } else {
+      std::cout << "you lose\n";
+      sphere.position = glm::vec3{0.0f, 1.0f, 0.0f};
+      world_->restart = 2;
+      world_->score[1]++;
+    }
+    std::cout << "SCORE: " << world_->score[0] << " " << world_->score[1]
+              << std::endl;
+  } else if (position_.y > 0 && position_.y < 1) {
+    jump = 0;
+  }
+  if (world_->restart == 1 && !owner->is_enemy) {
+    sphere.position = glm::vec3{0.0f, 1.0f, 0.0f};
+    world_->restart = 0;
+  } else if (world_->restart == 2 && owner->is_enemy) {
+    sphere.position = glm::vec3{-5.0f, 1.0f, 0.0f};
+    world_->restart = 0;
+  }
   position_ = sphere.position;
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;

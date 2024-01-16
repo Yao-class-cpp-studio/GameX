@@ -91,6 +91,10 @@ class World {
 
   void UpdateTick();
 
+  int restart = 0;
+
+  int score[2] = {0, 0};
+
  private:
   friend ::GameBall::GameBall;
   friend ::GameBall::Logic::Manager;

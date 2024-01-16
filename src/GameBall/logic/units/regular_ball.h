@@ -34,6 +34,7 @@ class RegularBall : public Unit {
  private:
   float radius_{1.0f};
   float mass_{1.0f};
+  int jump;
   glm::vec3 position_{};
   glm::vec3 velocity_{};
   glm::mat3 orientation_{1.0f};
