@@ -1,170 +1,163 @@
+#include "GameBall/logic/units/regular_ball.h"
+
 #include "GameBall/core/game_ball.h"
+#include "GameBall/logic/world.h"
 
-#include <queue>
-
-#include "GameBall/core/actors/actors.h"
-#include "GameBall/logic/obstacles/obstacles.h"
-#include "GameBall/logic/units/units.h"
-
-namespace GameBall {
-
-GameBall::GameBall(const GameSettings &settings)
-    : GameX::Base::Application(settings) {
-  auto extent = FrameExtent();
-  float aspect = static_cast<float>(extent.width) / extent.height;
-  scene_ = Renderer()->CreateScene();
-  film_ = Renderer()->CreateFilm(extent.width, extent.height);
-  logic_manager_ = std::make_unique<Logic::Manager>();
-  asset_manager_ = std::make_unique<class AssetManager>(Renderer());
-
-  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+namespace GameBall::Logic::Units {
+RegularBall::RegularBall(World *world,
+                         uint64_t player_id,
+                         const glm::vec3 &position,
+                         float radius,
+                         float mass)
+    : Unit(world, player_id) {
+  radius_ = radius;
+  mass_ = mass;
+  position_ = position;
+  auto physics_world = world_->PhysicsWorld();
+  sphere_id_ = physics_world->CreateSphere();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  sphere.position = position_;
+  sphere.ini_position = position_;
+  sphere.SetRadiusMass(radius_, mass_);
+  sphere.orientation = orientation_;
+  sphere.velocity = velocity_;
+  sphere.angular_velocity = glm::vec3{0.0f};
+  sphere.elasticity = 1.0f;
+  sphere.friction = 10.0f;
+  sphere.gravity = glm::vec3{0.0f, -9.8f, 0.0f};
 }
 
-GameBall::~GameBall() {
-  asset_manager_.reset();
+RegularBall::~RegularBall() {
+  ;
 }
 
-void GameBall::OnInit() {
-  auto world = logic_manager_->World();
-
-  scene_->SetEnvmapImage(asset_manager_->ImageFile("textures/envmap.hdr"));
-
-  ambient_light_ = scene_->CreateLight<GameX::Graphics::AmbientLight>();
-  ambient_light_->SetLight(glm::vec3{0.3});
-
-  directional_light_ = scene_->CreateLight<GameX::Graphics::DirectionalLight>();
-  directional_light_->SetLight(glm::vec3{1.0f}, glm::vec3{3.0f, 2.0f, 1.0f});
-
-  auto primary_player = world->CreatePlayer();
-  auto enemy_player = world->CreatePlayer();
-  auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
-  auto enemy_unit_1 = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
-  auto enemy_unit_2 = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
-  auto enemy_unit_3 = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{0.0f, 1.0f, 5.0f}, 1.0f, 1.0f);
-  auto enemy_unit_4 = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{0.0f, 1.0f, -5.0f}, 1.0f, 1.0f);
-  auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
-      false, 20.0f);
-
-  primary_player_id_ = primary_player->PlayerId();
-  enemy_player_id_ = enemy_player->PlayerId();
-
-  primary_player->SetPrimaryUnit(primary_unit->UnitId());
-  enemy_player->SetEnemyUnit(enemy_unit_1->UnitId());
-
-  VkExtent2D extent = FrameExtent();
-  float aspect = static_cast<float>(extent.width) / extent.height;
-  camera_ = scene_->CreateCamera(glm::vec3{0.0f, 10.0f, 10.0f},
-                                 glm::vec3{0.0f, 0.0f, 0.0f}, 45.0f, aspect,
-                                 0.1f, 100.0f);
-  camera_controller_ =
-      std::make_unique<CameraControllerThirdPerson>(camera_.get(), aspect);
-
-  player_input_controller_ =
-      std::make_unique<Logic::PlayerInputController>(this);
-
-  logic_manager_->Start();
+SYNC_ACTOR_FUNC(RegularBall) {
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  actor->SetMass(1.0f);
+  actor->SetGravity(glm::vec3{0.0f, -9.8f, 0.0f});
+  actor->SetTransform(glm::mat3{radius_});
+  actor->SetMotion(position_, velocity_, orientation_, augular_momentum_);
+  actor->SetMomentOfInertia(sphere.inertia[0][0]);
 }
 
-void GameBall::OnCleanup() {
-  logic_manager_->Stop();
-  std::queue<Actor *> actors_to_remove;
-  for (auto &actor : actors_) {
-    actors_to_remove.push(actor.second);
-  }
+void RegularBall::UpdateTick() {
+  float delta_time = world_->TickDeltaT();
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  while (!actors_to_remove.empty()) {
-    auto actor = actors_to_remove.front();
-    actors_to_remove.pop();
-    actors_.erase(actor->SyncedLogicWorldVersion());
-    delete actor;
-  }
-}
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId() ||
+        UnitId() == owner->EnemyUnitId()) {
+    auto input = owner->TakePlayerInput();
+ 
+    glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+    glm::vec3 right =
+    glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
 
-void GameBall::OnUpdate() {
-  static auto last_time = std::chrono::steady_clock::now();
-  auto current_time = std::chrono::steady_clock::now();
-  float delta_time = std::chrono::duration<float, std::chrono::seconds::period>(
-                         current_time - last_time)
-                         .count();
-  last_time = current_time;
-
-  auto player_input = player_input_controller_->GetInput();
-
-  {
-    std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
-    logic_manager_->world_->SyncWorldState(this);
-    primary_player_primary_unit_object_id_ = 0;
-    auto primary_player = logic_manager_->world_->GetPlayer(primary_player_id_);
-    if (primary_player) {
-      auto primary_unit =
-          logic_manager_->world_->GetUnit(primary_player->PrimaryUnitId());
-      if (primary_unit) {
-        primary_player_primary_unit_object_id_ = primary_unit->ObjectId();
+    glm::vec3 moving_direction{};
+ 
+    float angular_acceleration = glm::radians(2880.0f);
+  
+    if (input.move_forward) {
+      moving_direction -= right;
+    }
+    if (input.move_backward) {
+      moving_direction += right;
+    }
+    if (input.move_left) {
+      moving_direction -= forward;
+    }
+    if (input.move_right) {
+      moving_direction += forward;
+    }
+    if (input.jump) {
+      if (sphere.position.y <= 1 && sphere.position.y >= 0) {
+        sphere.velocity += glm::vec3{0.0f, 7.0f, 0.0f};
       }
-      primary_player->SetInput(player_input);
     }
-    auto enemy_player = logic_manager_->world_->GetPlayer(enemy_player_id_);
-    if (enemy_player) {
-      auto enemy_unit =
-          logic_manager_->world_->GetUnit(enemy_player->EnemyUnitId());
-      if (enemy_unit) {
-        enemy_player_enemy_unit_object_id_ = enemy_unit->ObjectId();
-      }
-      enemy_player->SetInput(player_input);
+    if (input.quit) {
+      exit(0);
+    }
+    if (input.reset) {
+      sphere.position = sphere.ini_position + glm::vec3{0.0f, 5.0f, 0.0f};
+      sphere.velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.angular_velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.orientation = glm::mat3{1.0f};
+    }
+
+     if (glm::length(moving_direction) > 0.0f) {
+       moving_direction = glm::normalize(moving_direction);
+       sphere.angular_velocity +=
+       moving_direction * angular_acceleration * delta_time;
+    }
+
+    if (input.brake) {
+       sphere.angular_velocity = glm::vec3{0.0f};
+    }
     }
   }
 
-  std::queue<Actor *> actors_to_remove;
-  for (auto &actor : actors_) {
-    if (actor.second->SyncedLogicWorldVersion() ==
-        synced_logic_world_version_) {
-      actor.second->Update(delta_time);
-    } else {
-      actors_to_remove.push(actor.second);
-    }
-  }
+  sphere.velocity *= std::pow(0.5f, delta_time);
+  sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
-  while (!actors_to_remove.empty()) {
-    auto actor = actors_to_remove.front();
-    actors_to_remove.pop();
-    actors_.erase(actor->SyncedLogicWorldVersion());
-    delete actor;
-  }
-
-  auto actor = GetActor(primary_player_primary_unit_object_id_);
-  if (actor) {
-    camera_controller_->SetCenter(actor->Position());
-  }
-  camera_controller_->Update(delta_time);
+  position_ = sphere.position;
+  velocity_ = sphere.velocity;
+  orientation_ = sphere.orientation;
+  augular_momentum_ = sphere.inertia * sphere.angular_velocity;
 }
 
-void GameBall::OnRender() {
-  auto cmd_buffer = VkCore()->CommandBuffer();
-  Renderer()->RenderPipeline()->Render(cmd_buffer->Handle(), *scene_, *camera_,
-                                       *film_);
-
-  OutputImage(cmd_buffer->Handle(), film_->output_image.get());
-}
-void GameBall::CursorPosCallback(double xpos, double ypos) {
-  static double last_xpos = xpos;
-  static double last_ypos = ypos;
-  double dx = xpos - last_xpos;
-  double dy = ypos - last_ypos;
-
-  last_xpos = xpos;
-  last_ypos = ypos;
-
-  if (!ignore_next_mouse_move_) {
-    camera_controller_->CursorMove(dx, dy);
-  }
-
-  ignore_next_mouse_move_ = false;
+void RegularBall::SetMass(float mass) {
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  sphere.SetRadiusMass(radius_, mass);
+  mass_ = mass;
 }
 
-}  // namespace GameBall
+void RegularBall::SetGravity(const glm::vec3 &gravity) {
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  sphere.gravity = gravity;
+}
+
+void RegularBall::SetRadius(float radius) {
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  sphere.SetRadiusMass(radius, mass_);
+  radius_ = radius;
+}
+
+void RegularBall::SetMotion(const glm::vec3 &position,
+                            const glm::vec3 &velocity,
+                            const glm::mat3 &orientation,
+                            const glm::vec3 &angular_momentum) {
+  auto physics_world = world_->PhysicsWorld();
+  auto &sphere = physics_world->GetSphere(sphere_id_);
+  sphere.position = position;
+  sphere.velocity = velocity;
+  sphere.orientation = orientation;
+  sphere.angular_velocity = sphere.inertia_inv * angular_momentum;
+  position_ = position;
+  velocity_ = velocity;
+  orientation_ = orientation;
+  augular_momentum_ = angular_momentum;
+}
+
+glm::vec3 RegularBall::Position() const {
+  return position_;
+}
+
+glm::vec3 RegularBall::Velocity() const {
+  return velocity_;
+}
+
+glm::mat3 RegularBall::Orientation() const {
+  return orientation_;
+}
+
+glm::vec3 RegularBall::AngularMomentum() const {
+  return augular_momentum_;
+}
+
+}  // namespace GameBall::Logic::Units
