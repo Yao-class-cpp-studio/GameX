@@ -70,7 +70,18 @@ void RegularBall::UpdateTick() {
     if (input.move_right) {
       moving_direction += forward;
     }
-
+    //if (input.jump) {
+      //moving_direction+= 
+    //}
+    if (input.quit) {
+      exit(0);
+    }
+    if (input.reset) {
+      sphere.position = sphere.ini_position + glm::vec3{0.0f, 5.0f, 0.0f};
+      sphere.velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.angular_velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.orientation = glm::mat3{1.0f};
+    }
      if (glm::length(moving_direction) > 0.0f) {
        moving_direction = glm::normalize(moving_direction);
        sphere.angular_velocity +=
