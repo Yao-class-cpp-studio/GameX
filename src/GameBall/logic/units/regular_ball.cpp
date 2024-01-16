@@ -78,7 +78,8 @@ void RegularBall::UpdateTick() {
        }
  
        if (input.brake) {
-         sphere.angular_velocity = glm::vec3{0.0f};
+         sphere.angular_velocity -=
+             sphere.angular_velocity * delta_time * 7.2f;
        }
      }
    }
