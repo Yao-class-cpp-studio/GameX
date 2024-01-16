@@ -18,6 +18,7 @@
 #include <Ws2tcpip.h>
 #include <thread>
 #include <vector>
+#include <tuple>
 
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
@@ -34,6 +35,7 @@
 #include <netdb.h>
 #include <ifaddrs.h>
 #include <vector>
+#include <tuple>
 
 #endif
 
