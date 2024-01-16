@@ -52,8 +52,10 @@ void GameBall::OnInit() {
       false, 20.0f);
 
   primary_player_id_ = primary_player->PlayerId();
+  enemy_player_id_ = enemy_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
+  enemy_player->SetEnemyUnit(enemy_unit_1->UnitId());
 
   VkExtent2D extent = FrameExtent();
   float aspect = static_cast<float>(extent.width) / extent.height;
@@ -106,6 +108,15 @@ void GameBall::OnUpdate() {
         primary_player_primary_unit_object_id_ = primary_unit->ObjectId();
       }
       primary_player->SetInput(player_input);
+    }
+    auto enemy_player = logic_manager_->world_->GetPlayer(enemy_player_id_);
+    if (enemy_player) {
+      auto enemy_unit =
+          logic_manager_->world_->GetUnit(enemy_player->EnemyUnitId());
+      if (enemy_unit) {
+        enemy_player_enemy_unit_object_id_ = enemy_unit->ObjectId();
+      }
+      enemy_player->SetInput(player_input);
     }
   }
 
