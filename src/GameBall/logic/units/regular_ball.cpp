@@ -17,6 +17,7 @@ RegularBall::RegularBall(World *world,
   sphere_id_ = physics_world->CreateSphere();
   auto &sphere = physics_world->GetSphere(sphere_id_);
   sphere.position = position_;
+  sphere.ini_position = position_;
   sphere.SetRadiusMass(radius_, mass_);
   sphere.orientation = orientation_;
   sphere.velocity = velocity_;
@@ -45,43 +46,56 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  //  auto owner = world_->GetPlayer(player_id_);
-  //  if (owner) {
-  //    if (UnitId() == owner->PrimaryUnitId()) {
-  //      auto input = owner->TakePlayerInput();
-  //
-  //      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-  //      glm::vec3 right =
-  //          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
-  //
-  //      glm::vec3 moving_direction{};
-  //
-  //      float angular_acceleration = glm::radians(2880.0f);
-  //
-  //      if (input.move_forward) {
-  //        moving_direction -= right;
-  //      }
-  //      if (input.move_backward) {
-  //        moving_direction += right;
-  //      }
-  //      if (input.move_left) {
-  //        moving_direction -= forward;
-  //      }
-  //      if (input.move_right) {
-  //        moving_direction += forward;
-  //      }
-  //
-  //      if (glm::length(moving_direction) > 0.0f) {
-  //        moving_direction = glm::normalize(moving_direction);
-  //        sphere.angular_velocity +=
-  //            moving_direction * angular_acceleration * delta_time;
-  //      }
-  //
-  //      if (input.brake) {
-  //        sphere.angular_velocity = glm::vec3{0.0f};
-  //      }
-  //    }
-  //  }
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId()) {
+    auto input = owner->TakePlayerInput();
+ 
+    glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+    glm::vec3 right =
+    glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+
+    glm::vec3 moving_direction{};
+ 
+    float angular_acceleration = glm::radians(2880.0f);
+  
+    if (input.move_forward) {
+      moving_direction -= right;
+    }
+    if (input.move_backward) {
+      moving_direction += right;
+    }
+    if (input.move_left) {
+      moving_direction -= forward;
+    }
+    if (input.move_right) {
+      moving_direction += forward;
+    }
+    if (input.jump) {
+      if (sphere.position.y <= 1 && sphere.position.y >= 0) {
+        sphere.velocity += glm::vec3{0.0f, 7.0f, 0.0f};
+      }
+    }
+    if (input.quit) {
+      exit(0);
+    }
+    if (input.reset) {
+      sphere.position = sphere.ini_position + glm::vec3{0.0f, 5.0f, 0.0f};
+      sphere.velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.angular_velocity = glm::vec3{0.0f, 0.0f, 0.0f};
+      sphere.orientation = glm::mat3{1.0f};
+    }
+     if (glm::length(moving_direction) > 0.0f) {
+       moving_direction = glm::normalize(moving_direction);
+       sphere.angular_velocity +=
+       moving_direction * angular_acceleration * delta_time;
+    }
+
+    if (input.brake) {
+       sphere.angular_velocity = glm::vec3{0.0f};
+    }
+    }
+  }
 
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
