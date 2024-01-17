@@ -131,7 +131,7 @@ void RegularBall::UpdateTick() {
           if (i == 3) {
             std::cout << "Sorry, but we have to stop now.\n";
             tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-            Sleep(5000);
+            sleep(5000);
             exit(0);
           }
         }
