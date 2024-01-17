@@ -1,7 +1,8 @@
 #include "GameBall/logic/units/regular_ball.h"
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
-#include<windows.h>
+#include <termios.h>
+#include <unistd.h>
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
