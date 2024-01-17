@@ -75,13 +75,29 @@ void RegularBall::UpdateTick() {
       if (input.move_right) {
         moving_direction += forward;
       }
-      if (input.left_arrow && (cur_time - last_change_time >= 1.0)) {
+      if (input.left_arrow && (cur_time - last_change_time >= 1.0) && sphere.radius == 1.0f) {
         sphere.type = (sphere.type - 1) < 0 ? 2 : (sphere.type - 1);
         last_change_time = cur_time;
+        LAND_INFO("Sphere changed into type {}.", sphere.type);
       }
-      if (input.right_arrow && (cur_time - last_change_time >= 1.0)) {
+      if (input.right_arrow && (cur_time - last_change_time >= 1.0) && sphere.radius == 1.0f) {
         sphere.type = (sphere.type + 1) % 3;
         last_change_time = cur_time;
+        LAND_INFO("Sphere changed into type {}.", sphere.type);
+      }
+      if(input.shrink && (cur_time - last_change_time >= 1.0) && sphere.radius > 0.25f){
+        sphere.position = sphere.position + glm::vec3{0.0f,-0.5f * sphere.radius,0.0f};
+        sphere.radius *= 0.5f;
+        sphere.mass *= 0.125f;
+        last_change_time = cur_time;
+        LAND_INFO("Sphere shrank.");
+      }
+      if(input.grow && (cur_time - last_change_time >= 1.0) && sphere.radius < 4.0f){
+        sphere.position = sphere.position + glm::vec3{0.0f,sphere.radius,0.0f};
+        sphere.radius *= 2.0f;
+        sphere.mass *= 8.0f;
+        last_change_time = cur_time;
+        LAND_INFO("Sphere enlarged.");
       }
       if (input.brake) {
         sphere.angular_velocity *= 0.7f;
@@ -93,7 +109,7 @@ void RegularBall::UpdateTick() {
         sphere.velocity *= std::pow(delta_v, delta_time);
         sphere.angular_velocity *= std::pow(delta_av, delta_time);
       }
-      restart = input.restart || sphere.position.y <= -3.0f;
+      restart = input.restart || sphere.position.y <= -7.0f;
       if (restart) {
         sphere.position = glm::vec3{0.0f, sphere.radius + 0.1f, 0.0f};
       }
@@ -111,7 +127,7 @@ void RegularBall::UpdateTick() {
       // Controls enemy ball
       sphere.velocity *= std::pow(delta_v, delta_time);
       sphere.angular_velocity *= std::pow(delta_av, delta_time);
-      if (sphere.position.y <= -3.0f) {
+      if (sphere.position.y <= -7.0f) {
         sphere.position = glm::vec3{-5.0f, sphere.radius + 0.1f, 0.0f};
         restart = true;
       }
