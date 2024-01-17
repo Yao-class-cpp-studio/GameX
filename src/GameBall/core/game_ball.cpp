@@ -26,6 +26,7 @@ GameBall::~GameBall() {
 
 void GameBall::OnInit() {
   auto world = logic_manager_->World();
+  float ground_size = 40.0f;
 
   scene_->SetEnvmapImage(asset_manager_->ImageFile("textures/envmap.hdr"));
 
@@ -42,10 +43,11 @@ void GameBall::OnInit() {
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
       enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
-      false, 20.0f);
+      glm::vec3{0.0f, -ground_size, 0.0f},
+      std::numeric_limits<float>::infinity(), false, 2 * ground_size);
 
   primary_player_id_ = primary_player->PlayerId();
+  enemy_player_id_ = enemy_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
 
