@@ -41,6 +41,7 @@ SYNC_ACTOR_FUNC(RegularBall) {
 }
 
 long double last_change_time = -1, cur_time = 0;
+glm::vec3 player_pos = {0.0f, 0.0f, 0.0f};
 void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   cur_time += delta_time;
@@ -75,25 +76,31 @@ void RegularBall::UpdateTick() {
       if (input.move_right) {
         moving_direction += forward;
       }
-      if (input.left_arrow && (cur_time - last_change_time >= 1.0) && sphere.radius == 1.0f) {
+      if (input.left_arrow && (cur_time - last_change_time >= 1.0) &&
+          sphere.radius == 1.0f) {
         sphere.type = (sphere.type - 1) < 0 ? 2 : (sphere.type - 1);
         last_change_time = cur_time;
         LAND_INFO("Sphere changed into type {}.", sphere.type);
       }
-      if (input.right_arrow && (cur_time - last_change_time >= 1.0) && sphere.radius == 1.0f) {
+      if (input.right_arrow && (cur_time - last_change_time >= 1.0) &&
+          sphere.radius == 1.0f) {
         sphere.type = (sphere.type + 1) % 3;
         last_change_time = cur_time;
         LAND_INFO("Sphere changed into type {}.", sphere.type);
       }
-      if(input.shrink && (cur_time - last_change_time >= 1.0) && sphere.radius > 0.25f){
-        sphere.position = sphere.position + glm::vec3{0.0f,-0.5f * sphere.radius,0.0f};
+      if (input.shrink && (cur_time - last_change_time >= 1.0) &&
+          sphere.radius > 0.25f) {
+        sphere.position =
+            sphere.position + glm::vec3{0.0f, -0.5f * sphere.radius, 0.0f};
         sphere.radius *= 0.5f;
         sphere.mass *= 0.125f;
         last_change_time = cur_time;
         LAND_INFO("Sphere shrank.");
       }
-      if(input.grow && (cur_time - last_change_time >= 1.0) && sphere.radius < 4.0f){
-        sphere.position = sphere.position + glm::vec3{0.0f,sphere.radius,0.0f};
+      if (input.grow && (cur_time - last_change_time >= 1.0) &&
+          sphere.radius < 4.0f) {
+        sphere.position =
+            sphere.position + glm::vec3{0.0f, sphere.radius, 0.0f};
         sphere.radius *= 2.0f;
         sphere.mass *= 8.0f;
         last_change_time = cur_time;
@@ -102,15 +109,16 @@ void RegularBall::UpdateTick() {
       if (input.brake) {
         sphere.angular_velocity *= 0.7f;
         input.speed_up = false;
-      }else if (input.speed_up) {
+      } else if (input.speed_up) {
         sphere.velocity *= std::pow(3 * delta_v, delta_time);
         sphere.angular_velocity *= std::pow(3 * delta_av, delta_time);
-      }else{
+      } else {
         sphere.velocity *= std::pow(delta_v, delta_time);
         sphere.angular_velocity *= std::pow(delta_av, delta_time);
       }
       restart = input.restart || sphere.position.y <= -7.0f;
       if (restart) {
+        LAND_INFO("You LOSE~");
         sphere.position = glm::vec3{0.0f, sphere.radius + 0.1f, 0.0f};
       }
 
@@ -123,11 +131,34 @@ void RegularBall::UpdateTick() {
       sphere.elasticity = sphere.elasticities[sphere.type];
       sphere.friction = sphere.frictions[sphere.type];
       sphere.mass = sphere.masses[sphere.type];
+      player_pos = sphere.position;
     } else {
       // Controls enemy ball
+      if(cur_time>=5.0){
+        glm::vec3 forward = glm::normalize(player_pos - sphere.position);
+        glm::vec3 back =
+            glm::normalize(glm::vec3{0.0f, 0.0f, 0.0f} - sphere.position);
+        glm::vec3 right =
+            glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+        back = glm::normalize(glm::cross(back, glm::vec3{0.0f, 1.0f, 0.0f}));
+        glm::vec3 moving_direction{};
+        if (abs(sphere.position.x) <= 38.0f && abs(sphere.position.z) <= 38.0f)
+          moving_direction -= right;
+        else
+          moving_direction -= back;
+        float angular_acceleration = glm::radians(2880.0f);
+
+        if (glm::length(moving_direction) > 0.0f) {
+          moving_direction = glm::normalize(moving_direction);
+          sphere.angular_velocity +=
+              moving_direction * angular_acceleration * delta_time;
+        }
+      }
+
       sphere.velocity *= std::pow(delta_v, delta_time);
       sphere.angular_velocity *= std::pow(delta_av, delta_time);
       if (sphere.position.y <= -7.0f) {
+        LAND_INFO("You WON!!");
         sphere.position = glm::vec3{-5.0f, sphere.radius + 0.1f, 0.0f};
         restart = true;
       }
