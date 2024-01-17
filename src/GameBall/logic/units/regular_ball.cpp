@@ -1,6 +1,7 @@
 #include "GameBall/logic/units/regular_ball.h"
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
+#include<windows.h>
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
@@ -102,9 +103,10 @@ void RegularBall::UpdateTick() {
           exit(0);
         }
         if (input.halt) {
-          std::cout << "Halting¡­¡­\n";
+          std::cout << "______________Halting______________\n";
           std::cout << "Press Enter to restart the game:";
           getchar();
+         
         }
       } else {
         glm::vec3 zero_v{0.0f};
