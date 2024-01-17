@@ -104,9 +104,36 @@ void RegularBall::UpdateTick() {
           exit(0);
         }
         if (input.halt) {
-          std::cout << "Halting¡­¡­\n";
-          std::cout << "Press Enter to restart the game:";
-          getchar();
+                   std::cout << "______________Halting______________\n";
+          std::cout << "Please enter a 4-digit password:\n";
+          termios oldt;
+          tcgetattr(STDIN_FILENO, &oldt);
+          termios newt=oldt;
+          newt.c_lflag &= ~ECHO;
+          tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+          std::string password, enter;
+          char p;
+          int length = 4;
+          for (int i = 0; i < length; i++)
+            std::cin >> p, password += p;
+          std::cout << "Successfully memorized password, enter again to "
+                       "restart the game:\n";
+          int i;
+          for (i = 0; i < 3; i++) {
+            std::cin >> enter;
+            if (enter == password) {
+              input.halt = false;
+              tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              break;
+            } else if (i<2)
+              std::cout << "Enter again:\n";
+          }
+          if (i == 3) {
+            std::cout << "Sorry, but we have to stop now.\n";
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            Sleep(5000);
+            exit(0);
+          }
         }
       } else {
         glm::vec3 zero_v{0.0f};
