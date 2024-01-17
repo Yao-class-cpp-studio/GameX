@@ -46,12 +46,13 @@ void RegularBall::UpdateTick() {
   cur_time += delta_time;
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
-  bool speed_up = false, restart = false;
+  bool restart = false;
   float delta_v = 0.5f, delta_av = 0.2f;
   auto owner = world_->GetPlayer(player_id_);
 
   if (owner) {
     if (UnitId() == owner->PrimaryUnitId()) {
+      // Controls player ball
       auto input = owner->TakePlayerInput();
 
       glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
@@ -82,8 +83,20 @@ void RegularBall::UpdateTick() {
         sphere.type = (sphere.type + 1) % 3;
         last_change_time = cur_time;
       }
-      speed_up = input.speed_up;
+      if (input.brake) {
+        sphere.angular_velocity *= 0.7f;
+        input.speed_up = false;
+      }else if (input.speed_up) {
+        sphere.velocity *= std::pow(3 * delta_v, delta_time);
+        sphere.angular_velocity *= std::pow(3 * delta_av, delta_time);
+      }else{
+        sphere.velocity *= std::pow(delta_v, delta_time);
+        sphere.angular_velocity *= std::pow(delta_av, delta_time);
+      }
       restart = input.restart || sphere.position.y <= -3.0f;
+      if (restart) {
+        sphere.position = glm::vec3{0.0f, sphere.radius + 0.1f, 0.0f};
+      }
 
       if (glm::length(moving_direction) > 0.0f) {
         moving_direction = glm::normalize(moving_direction);
@@ -91,28 +104,26 @@ void RegularBall::UpdateTick() {
             moving_direction * angular_acceleration * delta_time;
       }
 
-      if (input.brake) {
-        sphere.angular_velocity *= 0.7f;
-        speed_up = false;
+      sphere.elasticity = sphere.elasticities[sphere.type];
+      sphere.friction = sphere.frictions[sphere.type];
+      sphere.mass = sphere.masses[sphere.type];
+    } else {
+      // Controls enemy ball
+      sphere.velocity *= std::pow(delta_v, delta_time);
+      sphere.angular_velocity *= std::pow(delta_av, delta_time);
+      if (sphere.position.y <= -3.0f) {
+        sphere.position = glm::vec3{-5.0f, sphere.radius + 0.1f, 0.0f};
+        restart = true;
       }
     }
   }
 
-  if (speed_up)
-    delta_v *= 3.0f, delta_av *= 3.0f;
-  sphere.velocity *= std::pow(delta_v, delta_time);
-  sphere.angular_velocity *= std::pow(delta_av, delta_time);
-  sphere.elasticity = sphere.elasticities[sphere.type];
-  sphere.friction = sphere.frictions[sphere.type];
-  sphere.mass = sphere.masses[sphere.type];
-
-  if(!restart){
+  if (!restart) {
     position_ = sphere.position;
     velocity_ = sphere.velocity;
     orientation_ = sphere.orientation;
     augular_momentum_ = sphere.inertia * sphere.angular_velocity;
-  }else{
-    position_ = sphere.position = glm::vec3{0.0f, sphere.radius + 0.1f, 0.0f};
+  } else {
     velocity_ = sphere.velocity = glm::vec3{0.0f};
     augular_momentum_ = sphere.angular_velocity = glm::vec3{0.0f};
     orientation_ = sphere.orientation = glm::mat3{1.0f};

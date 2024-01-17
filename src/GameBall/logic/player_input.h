@@ -16,6 +16,8 @@ struct PlayerInput {
   bool left_arrow{false};
   bool right_arrow{false};
   bool restart{false};
+  bool grow{false};
+  bool shrink{false};
   glm::vec3 orientation{0.0f, 0.0f, 1.0f};
 };
 

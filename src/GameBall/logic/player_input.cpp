@@ -17,6 +17,8 @@ PlayerInput PlayerInputController::GetInput() {
   input_.left_arrow = (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
   input_.right_arrow = (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
   input_.restart = (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);
+  input_.grow = (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+  input_.shrink = (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
   auto camera_controller = app_->CameraController();
   auto pitch_yaw = camera_controller->GetPitchYaw();
   auto pitch = pitch_yaw.x;
