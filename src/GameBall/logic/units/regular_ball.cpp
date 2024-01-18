@@ -1,7 +1,7 @@
 #include "GameBall/logic/units/regular_ball.h"
 
 #include "GameBall/core/game_ball.h"
-#include "GameBall/logic/units/settlement.h"
+//#include "GameBall/logic/units/settlement.h"
 #include "GameBall/logic/world.h"
 
 namespace GameBall::Logic::Units {
