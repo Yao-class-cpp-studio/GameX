@@ -47,10 +47,28 @@ void RegularBall::UpdateTick() {
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
   auto owner = world_->GetPlayer(player_id_);
-  if (owner) {
-    if (UnitId() == owner->PrimaryUnitId()) {
-      auto input = owner->TakePlayerInput();
+  sphere.velocity *= std::pow(0.5f, delta_time);
+  sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
+  if (owner) {
+    auto input = owner->TakePlayerInput();
+    if (input.original_mode) {
+      std::cout << "Switch to original mode\n";
+      world_->difficulty = 0;
+    }
+    if (input.easy_mode) {
+      std::cout << "Switch to easy mode\n";
+      world_->difficulty = 2;
+    }
+    if (input.medium_mode) {
+      std::cout << "Switch to medium mode\n";
+      world_->difficulty = 4;
+    }
+    if (input.difficult_mode) {
+      std::cout << "Switch to difficult mode\n";
+      world_->difficulty = 6;
+    }
+    if (UnitId() == owner->PrimaryUnitId()) {
       glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
       glm::vec3 right =
           glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
@@ -98,11 +116,13 @@ void RegularBall::UpdateTick() {
       if (input.brake) {
         sphere.angular_velocity = glm::vec3{0.0f};
       }
+      world_->owner_place = sphere.position;
+    }
+    else {
+      glm::vec3 relative_pos = glm::normalize(sphere.position - world_->owner_place);
+      sphere.velocity -= 0.01f * world_->difficulty * relative_pos;
     }
   }
-
-  sphere.velocity *= std::pow(0.5f, delta_time);
-  sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
   position_ = sphere.position;
   if (position_.y < -30) {

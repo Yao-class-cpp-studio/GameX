@@ -2,7 +2,6 @@
 #include <dispatch/dispatch.h>
 #include <string>
 
-
 void renderLoop(GLFWwindow* window) {
     // Set the start time
     double startTime = glfwGetTime();
@@ -22,6 +21,7 @@ void createWindowAndRunLoop(std::string str) {
         // Handle error appropriately
         return;
     }
+    glfwSetWindowTitle(window, str.c_str());
     glfwMakeContextCurrent(window);
 
     // Run the rendering loop on the main thread

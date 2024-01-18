@@ -1,33 +1,36 @@
 # GameX
 
-## Controls:
+## Game Controls:
 
-* **w:** Move the ball forward
-* **a:** Move the ball left
-* **s:** Move the ball backward
-* **d:** Move the ball right
-* **r:** Rotate the ball with angular velocity in the z-direction
-* **j:** Jump, and you can perform a double jump while falling
+#### Movement
+
+- **W:** Move the ball forward
+- **A:** Move the ball left
+- **S:** Move the ball backward
+- **D:** Move the ball right
+- **R:** Rotate the ball with angular velocity in the z-direction
+- **J:** Jump, perform a double jump while falling
+
+#### Difficulty Modes
+
+- **0:** Switch to original mode
+- **1:** Switch to easy mode
+- **2:** Switch to medium mode
+- **3:** Switch to difficult mode
 
 ## Gameplay:
 
-Your objective is to navigate the ball through the environment, overcoming obstacles and challenges. Use the movement controls to traverse the terrain, and the new feature controls to add a dynamic element to your strategy.
+Welcome to the ball game!
 
-### Jumping:
-
-The "j" key allows the ball to jump, providing a means to overcome gaps or obstacles. Importantly, you can execute a double jump while in mid-air, enhancing your ability to navigate through tricky situations.
-
-### Rotation:
-
-The "r" key enables you to rotate the ball with angular velocity in the z-direction. This feature can be particularly useful when dealing with certain obstacles or when you need to adjust your orientation to reach specific areas.
+Your mission is to navigate your ball strategically to defeat the stationary enemy. Master the controls to adjust direction, rotation, and execute jumps to defeat your enemy in a more fantasy way. When starting the game, your adversary remains motionless, providing you with an opportunity to plan your moves. Choose the level of challenge that suits you by pressing the corresponding number key.
 
 ## End of Game:
 
-The game concludes when the ball falls from the platform. At this point, the results of your game will be displayed in a new window. The results may include your score. A new game will restart automatically after falling down some time.
+The game concludes when the ball falls from the platform. At this point, the results of your game will be displayed in a new window. The results may include your score. A new game will restart automatically after falling down for a few seconds.
 
 ### Known Issues:
 
-After the results window closes, the mouse focus may not automatically return to the game window. To resume playing, simply click the mouse once within the game window
+After the results window closes, the mouse focus may not automatically return to the game window. To resume playing, simply click the mouse once within the game window. In addition, if you have any suggestions to enhance the visual appeal of the window, I would greatly appreciate hearing them.
 
 ## Tips:
 
@@ -37,4 +40,4 @@ After the results window closes, the mouse focus may not automatically return to
 
 Have a great time playing the Ball Game! If you encounter any issues or have suggestions for improvements, feel free to provide feedback.
 
-Enjoy the game!
+#### Enjoy the game and have fun rolling your way to victory!
