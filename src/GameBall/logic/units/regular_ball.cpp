@@ -2,7 +2,10 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
-#include<windows.h>
+
+#include<termios.h>
+#include <unistd.h>
+
 namespace GameBall::Logic::Units {
 short count_ret = 0, count_fallen=0;//count how many times R is pressed.
 //count how many balls have fallen
@@ -122,10 +125,11 @@ void RegularBall::UpdateTick() {
           }
           std::cout << "______________Halting______________\n";
           std::cout << "Please enter a 4-digit password:\n";
-          HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-          DWORD mode = 0;
-          GetConsoleMode(hStdin, &mode);
-          SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+          termios oldt;
+          tcgetattr(STDIN_FILENO, &oldt);
+          termios newt=oldt;
+          newt.c_lflag &= ~ECHO;
+          tcsetattr(STDIN_FILENO, TCSANOW, &newt);
           std::string password, enter;
           char p;
           int length = 4;
@@ -138,15 +142,15 @@ void RegularBall::UpdateTick() {
             std::cin >> enter;
             if (enter == password) {
               input.halt = false;
-              // Linux:tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
               break;
             } else if (i < 2)
               std::cout << "Enter again:\n";
           }
           if (i == 3) {
             std::cout << "Sorry, but we have to stop now.\n";
-            // Linux:tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-            Sleep(5000);  // Linux:sleep(5000)
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            sleep(5000);  // Linux:sleep(5000)
             world_->RemovePlayer(owner->PrimaryUnitId());
             exit(0);
           }
@@ -182,19 +186,19 @@ void RegularBall::UpdateTick() {
           std::abs(sphere.position.z) <= 2.25f) {
         world_->RemovePlayer(owner->PrimaryUnitId());
         std::cerr << "You have lost the game!";
-        Sleep(3000);
+         sleep(3000);
         exit(0);
       }
     } else if (Y1 > sphere.position.y + 10.0f ||
                sphere.position.y < 0.0f && count_ret >= 2) {
       world_->RemovePlayer(owner->PrimaryUnitId());
       std::cerr << "You have lost the game!";
-      Sleep(3000);
+      sleep(3000);
       exit(0);
     } else if (Y1>0.0f&&count_fallen==number_of_balls) {
       world_->RemovePlayer(owner->PrimaryUnitId());
       std::cerr << "$$$$$$@@@@@@You have won the game!@@@@@@$$$$$$";
-      Sleep(10000);
+      sleep(10000);
       exit(0);
     }
   }
