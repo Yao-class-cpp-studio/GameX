@@ -1,8 +1,8 @@
 #include "GameBall/logic/units/regular_ball.h"
-
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
-
+#include <termios.h>
+#include <unistd.h>
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
@@ -44,45 +44,110 @@ void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId()) {
+      auto input = owner->TakePlayerInput();
 
-  //  auto owner = world_->GetPlayer(player_id_);
-  //  if (owner) {
-  //    if (UnitId() == owner->PrimaryUnitId()) {
-  //      auto input = owner->TakePlayerInput();
-  //
-  //      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-  //      glm::vec3 right =
-  //          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
-  //
-  //      glm::vec3 moving_direction{};
-  //
-  //      float angular_acceleration = glm::radians(2880.0f);
-  //
-  //      if (input.move_forward) {
-  //        moving_direction -= right;
-  //      }
-  //      if (input.move_backward) {
-  //        moving_direction += right;
-  //      }
-  //      if (input.move_left) {
-  //        moving_direction -= forward;
-  //      }
-  //      if (input.move_right) {
-  //        moving_direction += forward;
-  //      }
-  //
-  //      if (glm::length(moving_direction) > 0.0f) {
-  //        moving_direction = glm::normalize(moving_direction);
-  //        sphere.angular_velocity +=
-  //            moving_direction * angular_acceleration * delta_time;
-  //      }
-  //
-  //      if (input.brake) {
-  //        sphere.angular_velocity = glm::vec3{0.0f};
-  //      }
-  //    }
-  //  }
+      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+      glm::vec3 right =
+          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
 
+      glm::vec3 moving_direction{};
+
+      float angular_acceleration = glm::radians(2880.0f);
+      if (!input.restart_halt) {
+        if (input.move_forward) {
+          moving_direction -= right;
+        }
+        if (input.move_backward) {
+          moving_direction += right;
+        }
+        if (input.move_left) {
+          moving_direction -= forward;
+        }
+        if (input.move_right) {
+          moving_direction += forward;
+        }
+
+        if (glm::length(moving_direction) > 0.0f) {
+          moving_direction = glm::normalize(moving_direction);
+          sphere.angular_velocity +=
+              moving_direction * angular_acceleration * delta_time;
+        }
+
+        if (input.brake && sphere.position.y<1.01f&&sphere.position.y>0.99f) {
+          sphere.angular_velocity = glm::vec3{0.0f};
+        }
+
+        if (input.low) {
+          sphere.mass *= 0.9f;
+        }
+
+        if (input.high && std::abs(sphere.position.x) < 1.0f &&
+            std::abs(sphere.position.z) < 1.0f &&
+            std::abs(sphere.position.y - 1.0f) < 0.01f) {
+          sphere.mass *= 1.1f;
+        }
+        if (input.v_jump) {
+          if (sphere.position.y < 1.01f && sphere.position.y > 0.99f)
+            sphere.velocity.y = 10.0f;
+        }
+        if (input.return_if_too_light)
+          if (sphere.mass <= 0.50f) {
+            sphere.position.y = 1.00f;
+            sphere.position.x = 0.00f;
+            sphere.position.z = 0.00f;
+            sphere.mass = 1.0f;
+          }
+        if (input.end_if_too_heavy && sphere.mass >= 2.0f) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
+          exit(0);
+        }
+        if (input.halt) {
+                   std::cout << "______________Halting______________\n";
+          std::cout << "Please enter a 4-digit password:\n";
+          termios oldt;
+          tcgetattr(STDIN_FILENO, &oldt);
+          termios newt=oldt;
+          newt.c_lflag &= ~ECHO;
+          tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+          std::string password, enter;
+          char p;
+          int length = 4;
+          for (int i = 0; i < length; i++)
+            std::cin >> p, password += p;
+          std::cout << "Successfully memorized password, enter again to "
+                       "restart the game:\n";
+          int i;
+          for (i = 0; i < 3; i++) {
+            std::cin >> enter;
+            if (enter == password) {
+              input.halt = false;
+              tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              break;
+            } else if (i<2)
+              std::cout << "Enter again:\n";
+          }
+          if (i == 3) {
+            std::cout << "Sorry, but we have to stop now.\n";
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            sleep(5000);
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            exit(0);
+          }
+        }
+          if (input.end){
+        world_->RemovePlayer(owner->PrimaryUnitId());
+        exit(0);
+      }
+      } else {
+        glm::vec3 zero_v{0.0f};
+        sphere.velocity = zero_v;
+        sphere.angular_velocity *= 0;
+      }
+    }
+  }
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
