@@ -42,19 +42,19 @@ void GameBall::OnInit() {
   auto enemy_unit_1 = world->CreateUnit<Logic::Units::RegularBall>(
       enemy_player->PlayerId(), glm::vec3{-2.5f, 1.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit_2 = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -0.53f, 5.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{0.0f, 0.0f, 5.0f}, std::numeric_limits<float>::infinity(),
       false, 2.0f);
   auto enemy_unit_3 = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -0.53f, -5.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{0.0f, 0.0f, -5.0f}, std::numeric_limits<float>::infinity(),
       false, 2.0f);
   auto enemy_unit_4 = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{5.0f, -0.53f, 0.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{5.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 2.0f);
   auto enemy_unit_5 = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{-5.0f, -0.53f, 0.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{-5.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 2.0f);
   auto enemy_unit_6 = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -0.53f, 0.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{0.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 2.0f);
  
   /*auto enemy_unit_3 = world->CreateUnit<Logic::Units::RegularBall>(
