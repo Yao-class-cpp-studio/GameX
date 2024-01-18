@@ -1,8 +1,8 @@
 #include "GameBall/logic/units/regular_ball.h"
 
 #include "GameBall/core/game_ball.h"
+#include "GameBall/logic/units/settlement.h"
 #include "GameBall/logic/world.h"
-// #include "GameBall/logic/units/settlement.h"
 
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
@@ -106,19 +106,23 @@ void RegularBall::UpdateTick() {
 
   position_ = sphere.position;
   if (position_.y < -30) {
+    std::string result;
     if (owner->is_enemy) {
-      std::cout << "you win\n";
+      result = "you win";
       sphere.position = glm::vec3{-5.0f, 1.0f, 0.0f};
       world_->restart = 1;
       world_->score[0]++;
     } else {
-      std::cout << "you lose\n";
+      result = "you lose";
       sphere.position = glm::vec3{0.0f, 1.0f, 0.0f};
       world_->restart = 2;
       world_->score[1]++;
     }
-    std::cout << "SCORE: " << world_->score[0] << " " << world_->score[1]
-              << std::endl;
+    result += "\t\tSCORE: " + std::to_string(world_->score[0]) + " : " +
+              std::to_string(world_->score[1]);
+    showWindow(result);
+    // std::cout << "SCORE: " << world_->score[0] << " " << world_->score[1]
+    //           << std::endl;
   } else if (position_.y > 0 && position_.y < 1) {
     jump = 0;
   }

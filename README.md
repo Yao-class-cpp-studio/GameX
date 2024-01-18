@@ -23,7 +23,11 @@ The "r" key enables you to rotate the ball with angular velocity in the z-direct
 
 ## End of Game:
 
-The game concludes when the ball falls from the platform. At this point, the results of your game will be displayed in the terminal. The results may include your score, the duration of your gameplay, or any other relevant metrics.
+The game concludes when the ball falls from the platform. At this point, the results of your game will be displayed in a new window. The results may include your score. A new game will restart automatically after falling down some time.
+
+### Known Issues:
+
+After the results window closes, the mouse focus may not automatically return to the game window. To resume playing, simply click the mouse once within the game window
 
 ## Tips:
 
