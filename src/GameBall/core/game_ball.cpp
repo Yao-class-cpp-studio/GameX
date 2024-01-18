@@ -193,7 +193,7 @@ void GameBall::OnInit() {
 
   if (settings_.mode == "client") {
     world->game_node_.is_server = false;
-    world->game_node_.initialize(DEFAULT_PORT);
+    world->game_node_.initialize(DEFAULT_PORT + 1);
 
   } else if (settings_.mode == "room") {
     world->game_node_.is_server = true;
