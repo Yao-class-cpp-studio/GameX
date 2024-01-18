@@ -37,6 +37,7 @@ class Block : public Obstacle {
 
   glm::vec3 gravity_{};
   float mass_{};
+  uint64_t timer_ = 0;
 
   uint64_t cude_id_{};
 };
