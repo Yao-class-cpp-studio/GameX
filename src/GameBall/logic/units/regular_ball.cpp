@@ -76,7 +76,7 @@ void RegularBall::UpdateTick() {
               moving_direction * angular_acceleration * delta_time;
         }
 
-        if (input.brake && !input.v_jump) {
+        if (input.brake && sphere.y<1.01f&&sphere.y>0.99f) {
           sphere.angular_velocity = glm::vec3{0.0f};
         }
 
@@ -101,6 +101,7 @@ void RegularBall::UpdateTick() {
             sphere.mass = 1.0f;
           }
         if (input.end_if_too_heavy && sphere.mass >= 2.0f) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
           exit(0);
         }
         if (input.halt) {
@@ -132,16 +133,19 @@ void RegularBall::UpdateTick() {
             std::cout << "Sorry, but we have to stop now.\n";
             tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
             sleep(5000);
+            world_->RemovePlayer(owner->PrimaryUnitId());
             exit(0);
           }
         }
+          if (input.end){
+        world_->RemovePlayer(owner->PrimaryUnitId());
+        exit(0);
+      }
       } else {
         glm::vec3 zero_v{0.0f};
         sphere.velocity = zero_v;
         sphere.angular_velocity *= 0;
       }
-      if (input.end)
-        exit(0);
     }
   }
   sphere.velocity *= std::pow(0.5f, delta_time);
