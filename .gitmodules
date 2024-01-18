@@ -1,7 +1,6 @@
 [submodule "external/grassland"]
 	path = external/grassland
 	url = https://github.com/LazyJazz/grassland.git
-
 [submodule "assets"]
 	path = assets
 	url = https://github.com/LazyJazz/GameXAssets.git
