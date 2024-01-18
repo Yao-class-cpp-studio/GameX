@@ -76,7 +76,7 @@ void RegularBall::UpdateTick() {
               moving_direction * angular_acceleration * delta_time;
         }
 
-        if (input.brake && sphere.y<1.01f&&sphere.y>0.99f) {
+        if (input.brake && sphere.position.y<1.01f&&sphere.position.y>0.99f) {
           sphere.angular_velocity = glm::vec3{0.0f};
         }
 
