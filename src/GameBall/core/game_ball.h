@@ -73,6 +73,7 @@ class GameBall : public GameX::Base::Application {
   uint64_t primary_player_primary_unit_object_id_{0};
 
   bool ignore_next_mouse_move_{true};
+  bool showing_start_page_{true};
 
   std::unique_ptr<Logic::PlayerInputController> player_input_controller_;
 

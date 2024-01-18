@@ -17,7 +17,7 @@ GameBall::GameBall(const GameSettings &settings)
   logic_manager_ = std::make_unique<Logic::Manager>();
   asset_manager_ = std::make_unique<class AssetManager>(Renderer());
 
-  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 GameBall::~GameBall() {
@@ -26,7 +26,6 @@ GameBall::~GameBall() {
 
 void GameBall::OnInit() {
   auto world = logic_manager_->World();
-
   scene_->SetEnvmapImage(asset_manager_->ImageFile("textures/envmap.hdr"));
 
   ambient_light_ = scene_->CreateLight<GameX::Graphics::AmbientLight>();
@@ -81,6 +80,15 @@ void GameBall::OnCleanup() {
 }
 
 void GameBall::OnUpdate() {
+  if (showing_start_page_) {
+      //if the user click the button then start
+    int state = glfwGetMouseButton(window_, GLFW_MOUSE_BUTTON_LEFT);
+    if (state == GLFW_PRESS) {
+      showing_start_page_ = false;
+       glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    return;
+  }
   static auto last_time = std::chrono::steady_clock::now();
   auto current_time = std::chrono::steady_clock::now();
   float delta_time = std::chrono::duration<float, std::chrono::seconds::period>(
@@ -131,10 +139,16 @@ void GameBall::OnUpdate() {
 
 void GameBall::OnRender() {
   auto cmd_buffer = VkCore()->CommandBuffer();
-  Renderer()->RenderPipeline()->Render(cmd_buffer->Handle(), *scene_, *camera_,
-                                       *film_);
+  if (showing_start_page_) {
+    printf("Showing first event\n");
+    OutputImage(vk_core_->CommandBuffer()->Handle(),
+                asset_manager_->ImageFile("textures/start_page.png")->Handle());
+  } else {
+    Renderer()->RenderPipeline()->Render(cmd_buffer->Handle(), *scene_,
+                                         *camera_, *film_);
+    OutputImage(cmd_buffer->Handle(), film_->output_image.get());
+  }
 
-  OutputImage(cmd_buffer->Handle(), film_->output_image.get());
 }
 void GameBall::CursorPosCallback(double xpos, double ypos) {
   static double last_xpos = xpos;
