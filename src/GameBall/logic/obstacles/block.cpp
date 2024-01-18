@@ -72,9 +72,13 @@ void Block::SetMotion(const glm::vec3 &position,
 }
 
 void Block::UpdateTick() {
+  timer_++;
   auto physics_world = world_->PhysicsWorld();
   auto &cube = physics_world->GetCube(cude_id_);
   position_ = cube.position;
+  if (cube.position != glm::vec3{0.0f, -10.0f, 0.0f}) {
+    cube.velocity = glm::vec3{0, 0.6*cos(timer_/100), 0};
+  }
   velocity_ = cube.velocity;
   orientation_ = cube.orientation;
   L_ = cube.inertia * cube.angular_velocity;
