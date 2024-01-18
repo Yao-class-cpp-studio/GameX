@@ -38,16 +38,39 @@ void GameBall::OnInit() {
   auto primary_player = world->CreatePlayer();
   auto enemy_player = world->CreatePlayer();
   auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
-  auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+      primary_player->PlayerId(), glm::vec3{2.5f, 1.0f, 0.0f}, 1.0f, 1.0f);
+  auto enemy_unit_1 = world->CreateUnit<Logic::Units::RegularBall>(
+      enemy_player->PlayerId(), glm::vec3{-2.5f, 1.0f, 0.0f}, 1.0f, 1.0f);
+  auto enemy_unit_2 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{0.0f, 0.0f, 5.0f}, std::numeric_limits<float>::infinity(),
+      false, 2.0f);
+  auto enemy_unit_3 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{0.0f, 0.0f, -5.0f}, std::numeric_limits<float>::infinity(),
+      false, 2.0f);
+  auto enemy_unit_4 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{5.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
+      false, 2.0f);
+  auto enemy_unit_5 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{-5.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
+      false, 2.0f);
+  auto enemy_unit_6 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{0.0f, 0.0f, 0.0f}, std::numeric_limits<float>::infinity(),
+      false, 2.0f);
+ 
+  /*auto enemy_unit_3 = world->CreateUnit<Logic::Units::RegularBall>(
+      enemy_player->PlayerId(), glm::vec3{0.0f, 1.0f, 5.0f}, 1.0f, 1.0f);
+  auto enemy_unit_4 = world->CreateUnit<Logic::Units::RegularBall>(
+      enemy_player->PlayerId(), glm::vec3{0.0f, 1.0f, -5.0f}, 1.0f, 1.0f);*/
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
       glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 20.0f);
 
+
   primary_player_id_ = primary_player->PlayerId();
+  enemy_player_id_ = enemy_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
+  enemy_player->SetEnemyUnit(enemy_unit_1->UnitId());
 
   VkExtent2D extent = FrameExtent();
   float aspect = static_cast<float>(extent.width) / extent.height;
@@ -101,6 +124,15 @@ void GameBall::OnUpdate() {
       }
       primary_player->SetInput(player_input);
     }
+    auto enemy_player = logic_manager_->world_->GetPlayer(enemy_player_id_);
+    if (enemy_player) {
+      auto enemy_unit =
+          logic_manager_->world_->GetUnit(enemy_player->EnemyUnitId());
+      if (enemy_unit) {
+        enemy_player_enemy_unit_object_id_ = enemy_unit->ObjectId();
+      }
+      enemy_player->SetInput(player_input);
+    }
   }
 
   std::queue<Actor *> actors_to_remove;
@@ -121,8 +153,22 @@ void GameBall::OnUpdate() {
   }
 
   auto actor = GetActor(primary_player_primary_unit_object_id_);
-  if (actor) {
+  auto actor1 = GetActor(enemy_player_enemy_unit_object_id_);
+  if (actor && actor1) {
+    if (actor->Position().y <= 0) {
+      camera_controller_->SetCenter(actor1->Position());
+    } else if (actor1->Position().y <= 0) {
+      camera_controller_->SetCenter(actor->Position());
+    } else {
+      auto temp = glm::vec3{(actor->Position().x + actor1->Position().x) / 2,
+                            (actor->Position().y + actor1->Position().y) / 2,
+                            (actor->Position().z + actor1->Position().z) / 2};
+      camera_controller_->SetCenter(temp);
+    }
+  } else if (actor) {
     camera_controller_->SetCenter(actor->Position());
+  } else {
+    camera_controller_->SetCenter(actor1->Position());
   }
   camera_controller_->Update(delta_time);
 }

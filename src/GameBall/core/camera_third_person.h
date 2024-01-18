@@ -35,7 +35,7 @@ class CameraControllerThirdPerson {
 
  private:
   GameX::Graphics::PCamera camera_;
-  float dst_distance_{10.0f};
+  float dst_distance_{25.0f};
   glm::vec3 dst_center_{0.0f};
   float dst_pitch_{0.0f};
   float dst_yaw_{0.0f};

@@ -39,5 +39,6 @@ class RegularBall : public Unit {
   glm::mat3 orientation_{1.0f};
   glm::vec3 augular_momentum_{};
   uint64_t sphere_id_{};
+  uint64_t timer_=0;
 };
 }  // namespace GameBall::Logic::Units

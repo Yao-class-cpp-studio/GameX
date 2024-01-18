@@ -70,7 +70,9 @@ class GameBall : public GameX::Base::Application {
   std::unique_ptr<CameraControllerThirdPerson> camera_controller_;
 
   uint64_t primary_player_id_{0};
+  uint64_t enemy_player_id_{0};
   uint64_t primary_player_primary_unit_object_id_{0};
+  uint64_t enemy_player_enemy_unit_object_id_{0};
 
   bool ignore_next_mouse_move_{true};
 
