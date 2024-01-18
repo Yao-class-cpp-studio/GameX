@@ -298,16 +298,20 @@ void GameBall::OnInit() {
 
 void GameBall::OnCleanup() {
   logic_manager_->Stop();
-  std::queue<Actor *> actors_to_remove;
+  std::queue<uint64_t> actors_to_remove;
+
   for (auto &actor : actors_) {
-    actors_to_remove.push(actor.second);
+    actors_to_remove.push(actor.first);
   }
 
   while (!actors_to_remove.empty()) {
-    auto actor = actors_to_remove.front();
+    auto actor_id = actors_to_remove.front();
     actors_to_remove.pop();
-    actors_.erase(actor->SyncedLogicWorldVersion());
-    delete actor;
+
+    auto remove_actor_pointer = actors_.at(actor_id);
+    actors_.erase(actor_id);
+    if (!remove_actor_pointer)
+      delete remove_actor_pointer;
   }
 
   is_running = false;
