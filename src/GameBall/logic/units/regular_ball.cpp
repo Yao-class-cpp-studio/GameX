@@ -140,7 +140,7 @@ void RegularBall::UpdateTick() {
     }
     result += "\t\tSCORE: " + std::to_string(world_->score[0]) + " : " +
               std::to_string(world_->score[1]);
-    showWindow(result);
+    // showWindow(result);
     // std::cout << "SCORE: " << world_->score[0] << " " << world_->score[1]
     //           << std::endl;
   } else if (position_.y > 0 && position_.y < 1) {
