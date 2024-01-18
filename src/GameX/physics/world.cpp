@@ -68,7 +68,7 @@ void World::SolveCollisions() {
   std::mt19937 g(rd());
   std::shuffle(collision_pairs.begin(), collision_pairs.end(), g);
 
-  bool collision_found = false;
+  /* bool collision_found = false;
   do {
     collision_found = false;
     for (auto &pair : collision_pairs) {
@@ -77,8 +77,11 @@ void World::SolveCollisions() {
         collision_found = true;
       }
     }
-  } while (collision_found);
-}
+  } while (collision_found);*/
+  for (auto &pair : collision_pairs) {
+    SolveCollision(*std::get<0>(pair), *std::get<1>(pair), std::get<2>(pair));
+  }
+  }
 
 void World::ApplyGravity(float delta_time) {
   for (auto &sphere : spheres_) {
