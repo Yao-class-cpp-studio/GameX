@@ -1,15 +1,15 @@
 #include "GameBall/logic/units/regular_ball.h"
 
 #include "GameBall/core/game_ball.h"
-#include "GameBall/logic/world.h"
 #include "GameBall/core/packet_tool.h"
+#include "GameBall/logic/world.h"
 
 extern uint8_t app_type;
 
-namespace GameBall{
-  std::map<uint64_t, std::queue<std::string>> video_stream_map;
-  std::map<uint64_t, uint64_t> room_id_to_client_id;
-}
+namespace GameBall {
+std::map<uint64_t, std::queue<std::string>> video_stream_map;
+std::map<uint64_t, uint64_t> room_id_to_client_id;
+}  // namespace GameBall
 
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
@@ -52,11 +52,10 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  if (app_type != 1){
+  if (app_type != 1) {
     // Room / Local Update Scheme
     if (position_.y < -10.0f) {
-      position_ =
-          glm::vec3{0.0f, 10.0f, 0.0f};
+      position_ = glm::vec3{0.0f, 10.0f, 0.0f};
       sphere.position = position_;
       velocity_ = glm::vec3{0.0f};
       sphere.velocity = velocity_;
@@ -67,7 +66,8 @@ void RegularBall::UpdateTick() {
     auto owner = world_->GetPlayer(player_id_);
     if (owner) {
       if (UnitId() == owner->PrimaryUnitId()) {
-        auto input = owner->PlayerId() == 1 ? owner->TakePlayerInput() : owner->GetPlayerInput();
+        auto input = owner->PlayerId() == 1 ? owner->TakePlayerInput()
+                                            : owner->GetPlayerInput();
 
         glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
         glm::vec3 right =
@@ -91,7 +91,7 @@ void RegularBall::UpdateTick() {
         }
 
         if (input.jump) {
-          if(sphere.position.y < 1.01f && sphere.position.y > 0.99f)
+          if (sphere.position.y < 1.01f && sphere.position.y > 0.99f)
             sphere.velocity.y += 6.0f;  // Adjust the force as needed
         }
 
@@ -109,11 +109,10 @@ void RegularBall::UpdateTick() {
         }
       }
     }
-  }else{
-
+  } else {
     // Client Update Scheme
     auto owner = world_->GetPlayer(player_id_);
-    if (!video_stream_map.at(player_id_).empty()){
+    if (!video_stream_map.at(player_id_).empty()) {
       auto frame = video_stream_map.at(player_id_).front();
       video_stream_map.at(player_id_).pop();
 
@@ -139,9 +138,7 @@ void RegularBall::UpdateTick() {
       sphere.orientation[2][1] = (glm::f32)frame_data[16];
       sphere.orientation[2][2] = (glm::f32)frame_data[17];
     }
-
   }
-
 
   sphere.velocity *= std::pow(0.5f, delta_time);
   // Only update angular velocity when the ball is grounded

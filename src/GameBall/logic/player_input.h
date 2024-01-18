@@ -17,9 +17,9 @@ struct PlayerInput {
   glm::vec3 orientation{0.0f, 0.0f, 1.0f};
 };
 
-bool operator==(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs);
+bool operator==(const Logic::PlayerInput &lhs, const Logic::PlayerInput &rhs);
 
-bool operator!=(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs);
+bool operator!=(const Logic::PlayerInput &lhs, const Logic::PlayerInput &rhs);
 
 class PlayerInputController {
  public:

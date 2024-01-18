@@ -20,7 +20,8 @@ PlayerInput PlayerInputController::GetInput() {
   input_.orientation = {glm::sin(glm::radians(yaw)), 0.0f,
                         -glm::cos(glm::radians(yaw))};
 
-  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && input_.jump_released) {
+  if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS &&
+      input_.jump_released) {
     input_.jump = true;
     input_.jump_released = false;
   } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS) {
@@ -34,26 +35,22 @@ PlayerInput PlayerInputController::GetInput() {
   return result;
 }
 
-bool operator==(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs) {
+bool operator==(const Logic::PlayerInput &lhs, const Logic::PlayerInput &rhs) {
   // Compare each member of Logic::PlayerInput
-  return lhs.move_forward == rhs.move_forward
-         && lhs.move_backward == rhs.move_backward
-         && lhs.move_left == rhs.move_left
-         && lhs.move_right == rhs.move_right
-         && lhs.brake == rhs.brake
-         && lhs.jump == rhs.jump
-         && lhs.jump_released == rhs.jump_released;
+  return lhs.move_forward == rhs.move_forward &&
+         lhs.move_backward == rhs.move_backward &&
+         lhs.move_left == rhs.move_left && lhs.move_right == rhs.move_right &&
+         lhs.brake == rhs.brake && lhs.jump == rhs.jump &&
+         lhs.jump_released == rhs.jump_released;
 }
 
-bool operator!=(const Logic::PlayerInput& lhs, const Logic::PlayerInput& rhs) {
+bool operator!=(const Logic::PlayerInput &lhs, const Logic::PlayerInput &rhs) {
   // Compare each member of Logic::PlayerInput
-  return lhs.move_forward != rhs.move_forward
-         || lhs.move_backward != rhs.move_backward
-         || lhs.move_left != rhs.move_left
-         || lhs.move_right != rhs.move_right
-         || lhs.brake != rhs.brake
-         || lhs.jump != rhs.jump
-         || lhs.jump_released != rhs.jump_released;
+  return lhs.move_forward != rhs.move_forward ||
+         lhs.move_backward != rhs.move_backward ||
+         lhs.move_left != rhs.move_left || lhs.move_right != rhs.move_right ||
+         lhs.brake != rhs.brake || lhs.jump != rhs.jump ||
+         lhs.jump_released != rhs.jump_released;
 }
 
 }  // namespace GameBall::Logic

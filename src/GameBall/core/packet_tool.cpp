@@ -1,6 +1,7 @@
+#include "GameBall/core/packet_tool.h"
+
 #include <cstring>
 #include <sstream>
-#include "GameBall/core/packet_tool.h"
 
 namespace GameBall {
 

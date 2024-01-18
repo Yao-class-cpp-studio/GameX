@@ -1,5 +1,6 @@
 #include <cstring>
 #include <sstream>
+
 #include "GameBall/logic/logic.h"
 
 #ifndef GAMEX_PACKET_TOOL_H

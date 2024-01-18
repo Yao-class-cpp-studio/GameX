@@ -7,7 +7,7 @@
 P2PNode::P2PNode() : is_initialized(false), sockfd(INVALID_SOCKET) {
   // Initialize Winsock
   WSADATA wsaData;
-  int iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+  int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
   if (iResult != 0) {
     printf("WSAStartup failed: %d\n", iResult);
     exit(1);
@@ -47,7 +47,9 @@ void P2PNode::initialize(uint8_t port) {
   is_initialized = true;
 }
 
-void P2PNode::send(const std::string& message, const std::string& ip, uint8_t port) const {
+void P2PNode::send(const std::string &message,
+                   const std::string &ip,
+                   uint8_t port) const {
   if (!is_initialized) {
     printf("Node is not initialized.\n");
     return;
@@ -87,7 +89,8 @@ std::tuple<std::string, std::string, uint8_t> P2PNode::receive() {
   InetNtopA(AF_INET, &(sender_addr.sin_addr), sender_ip, INET_ADDRSTRLEN);
   int sender_port = ntohs(sender_addr.sin_port);
 
-  return std::make_tuple(std::string(buffer), std::string(sender_ip), sender_port);
+  return std::make_tuple(std::string(buffer), std::string(sender_ip),
+                         sender_port);
 }
 
 void P2PNode::closeConnection() {
@@ -104,9 +107,10 @@ bool P2PNode::isInited() const {
 
 #elif __APPLE__ || __linux__
 
-P2PNode::P2PNode() : is_initialized(false), is_server(false), sockfd(-1) {}
+P2PNode::P2PNode() : is_initialized(false), is_server(false), sockfd(-1) {
+}
 
-P2PNode::~P2PNode(){
+P2PNode::~P2PNode() {
   closeConnection();
 }
 
@@ -127,15 +131,19 @@ void P2PNode::initialize(uint8_t port) {
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   addr.sin_port = htons(port);
 
-  if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    std::cerr << "Error binding socket" << std::endl;
-    exit(1);
+  if (port) {
+    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+      std::cerr << "Error binding socket" << std::endl;
+      exit(1);
+    }
   }
 
   is_initialized = true;
 }
 
-void P2PNode::send(const std::string& message, const std::string& ip, uint8_t port) const {
+void P2PNode::send(const std::string &message,
+                   const std::string &ip,
+                   uint8_t port) const {
   if (!is_initialized) {
     std::cerr << "Node is not initialized." << std::endl;
     return;
@@ -194,7 +202,8 @@ bool P2PNode::isInited() const {
 std::vector<std::string> getLocalIPs() {
   std::vector<std::string> ips;
   ULONG ulOutBufLen = sizeof(IP_ADAPTER_INFO);
-  PIP_ADAPTER_INFO pAdapterInfo = (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
+  PIP_ADAPTER_INFO pAdapterInfo =
+      (IP_ADAPTER_INFO *)malloc(sizeof(IP_ADAPTER_INFO));
   PIP_ADAPTER_INFO pAdapter = NULL;
 
   if (GetAdaptersInfo(pAdapterInfo, &ulOutBufLen) == ERROR_BUFFER_OVERFLOW) {
@@ -234,10 +243,10 @@ std::vector<std::string> getLocalIPs() {
     if (ifa->ifa_addr == NULL)
       continue;
 
-    if (ifa->ifa_addr->sa_family == AF_INET) { // Check for IPv4
-      if (strcmp(ifa->ifa_name, "lo") != 0) {  // Exclude loopback interface
-        int s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in),
-                            host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+    if (ifa->ifa_addr->sa_family == AF_INET) {  // Check for IPv4
+      if (strcmp(ifa->ifa_name, "lo") != 0) {   // Exclude loopback interface
+        int s = getnameinfo(ifa->ifa_addr, sizeof(struct sockaddr_in), host,
+                            NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
         if (s != 0) {
           std::cerr << "getnameinfo() failed: " << gai_strerror(s) << std::endl;
           continue;

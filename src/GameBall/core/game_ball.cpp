@@ -62,10 +62,11 @@ void GameBall::receivePackets() {
       std::string command = msg.substr(pos + 1);
 
       // (A Open Bug) TODO: Fix the bug of client quit
-      // GameX still not have a proper scheme to handle client quit
-      // and it will crash if the client quit.
-      // The crash will occur in GameBall::OnUpdate(), when it tries to
-      // Clear the unregistered actors_ map.
+      // GameX still not have a proper scheme to
+      // erase the ball picture when the client quit.
+      // So we just remove the ball from the world.
+      // without cleaning picture.
+      // Hope someone can fix this in the future.
 
       if (command == "quit") {
         {
@@ -100,10 +101,6 @@ void GameBall::receivePackets() {
 
       valid_ball_map[primary_player_id_] = true;
 
-      // Receive Video Stream Calculated by Server
-      // Divide Data for Each Ball, then Push it to the Video Stream Queue
-      // Detect New Balls, and generate new players
-      // Detect Lost Balls, and remove the players
       std::stringstream ss(msg);
       std::string tmp_str;
 
@@ -139,7 +136,6 @@ void GameBall::receivePackets() {
 
           uint64_t real_id = room_id_to_client_id.at(id_in_room);
           video_stream_map.at(real_id).push(data);
-
 
           if (video_stream_map.at(real_id).size() > 128) {
             std::queue<std::string> emptyQueue;
@@ -197,7 +193,7 @@ void GameBall::OnInit() {
 
   if (settings_.mode == "client") {
     world->game_node_.is_server = false;
-    world->game_node_.initialize(settings_.self_port);
+    world->game_node_.initialize(0);
 
   } else if (settings_.mode == "room") {
     world->game_node_.is_server = true;

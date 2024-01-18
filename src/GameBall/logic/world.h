@@ -1,16 +1,16 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <queue>
-#include <atomic>
 #include <sstream>
 
+#include "GameBall/core/p2pnode.h"
 #include "GameBall/core/utils.h"
 #include "GameBall/logic/object.h"
 #include "GameBall/logic/obstacle.h"
 #include "GameBall/logic/player.h"
 #include "GameBall/logic/unit.h"
-#include "GameBall/core/p2pnode.h"
 
 namespace GameBall::Logic {
 class Manager;
