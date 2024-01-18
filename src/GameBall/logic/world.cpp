@@ -2,7 +2,7 @@
 
 #include "GameBall/core/game_ball.h"
 
-extern bool is_server;
+extern uint8_t app_type;
 
 namespace GameBall::Logic {
 
@@ -78,7 +78,7 @@ void World::UnregisterPlayer(uint64_t player_id) {
 
 void World::UpdateTick() {
   // LAND_INFO("Update Tick... {}", world_version_);
-  if (is_server) {
+  if (app_type != 1) {
     physics_world_->ApplyGravity(TickDeltaT());
     physics_world_->SolveCollisions();
   }
@@ -87,8 +87,7 @@ void World::UpdateTick() {
     pair.second->UpdateTick();
   }
 
-
-  if (is_server) {
+  if (app_type != 1) {
     physics_world_->SolveCollisions();
   }
 

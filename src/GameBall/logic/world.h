@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <queue>
+#include <atomic>
+#include <sstream>
 
 #include "GameBall/core/utils.h"
 #include "GameBall/logic/object.h"

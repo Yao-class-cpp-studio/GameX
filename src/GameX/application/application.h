@@ -5,6 +5,7 @@
 #include "GameX/utils/utils.h"
 
 #define DEFAULT_PORT 1115
+#define DEFAULT_SELF_PORT 1116
 
 namespace GameX::Base {
 
@@ -15,6 +16,7 @@ struct ApplicationSettings {
   std::string mode;
   std::string address;
   int port{DEFAULT_PORT};
+  int self_port{DEFAULT_SELF_PORT};
 };
 
 class Application {

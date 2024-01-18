@@ -1,5 +1,4 @@
 #include "GameBall/core/game_ball.h"
-#include "packet_tool.h"
 
 #include <atomic>
 #include <queue>
@@ -9,6 +8,7 @@
 #include "GameBall/core/p2pnode.h"
 #include "GameBall/logic/obstacles/obstacles.h"
 #include "GameBall/logic/units/units.h"
+#include "packet_tool.h"
 
 namespace GameBall {
 
@@ -19,9 +19,11 @@ struct InputPacket {
 
 std::thread listen_thread;
 std::queue<InputPacket> input_queue;
-std::queue<std::string> video_stream;
+extern std::map<uint64_t, std::queue<std::string>> video_stream_map;
+extern std::map<uint64_t, uint64_t> room_id_to_client_id;
+std::queue<uint64_t> remove_queue;
 std::atomic<bool> is_running(true);
-std::string global_mode;
+
 uint64_t data_id = 0;
 
 void GameBall::receivePackets() {
@@ -64,23 +66,26 @@ void GameBall::receivePackets() {
       // and it will crash if the client quit.
       // The crash will occur in GameBall::OnUpdate(), when it tries to
       // Clear the unregistered actors_ map.
+
       if (command == "quit") {
         {
           std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
 
-          world_->UnregisterObject(world_->GetPlayer(id)->PrimaryUnitId());
-          world_->UnregisterPlayer(id);
-
+          remove_queue.push(id);
           world_->game_node_.send("Bye", c_ip, c_port);
         }
         continue;
       }
 
-      // If the command is not quit, then it is a sync of user input, just push it to the input queue.
+      // If the command is not quit, then it is a sync of user input, just push
+      // it to the input queue.
       InputPacket inputPacket;
       inputPacket.player_id = id;
       inputPacket.input = StringToPlayerInput(command);
-      input_queue.push(inputPacket);
+      {
+        std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
+        input_queue.push(inputPacket);
+      }
     }
     std::cout << "Server stopped." << std::endl;
     return;
@@ -91,8 +96,81 @@ void GameBall::receivePackets() {
     std::cout << "Client started." << std::endl;
     while (is_running) {
       auto [msg, c_ip, c_port] = world_->game_node_.receive();
+      std::map<uint64_t, bool> valid_ball_map;
+
+      valid_ball_map[primary_player_id_] = true;
+
       // Receive Video Stream Calculated by Server
-      video_stream.push(msg);
+      // Divide Data for Each Ball, then Push it to the Video Stream Queue
+      // Detect New Balls, and generate new players
+      // Detect Lost Balls, and remove the players
+      std::stringstream ss(msg);
+      std::string tmp_str;
+
+      while (std::getline(ss, tmp_str, ',')) {
+        std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
+
+        std::stringstream fs(tmp_str);
+        std::string idStr;
+        std::string data;
+        if (std::getline(fs, idStr, ':') && std::getline(fs, data)) {
+          uint64_t id_in_room = std::stoull(idStr);
+
+          // Check if the id is in the map
+          if (room_id_to_client_id.find(id_in_room) ==
+              room_id_to_client_id.end()) {
+            auto new_player = world_->CreatePlayer();
+            auto new_unit = world_->CreateUnit<Logic::Units::RegularBall>(
+                new_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f,
+                1.0f);
+
+            new_player->SetPrimaryUnit(new_unit->UnitId());
+
+            room_id_to_client_id[id_in_room] = new_player->PlayerId();
+            video_stream_map[new_player->PlayerId()] =
+                std::queue<std::string>();
+
+            valid_ball_map[new_player->PlayerId()] = true;
+          } else {
+            valid_ball_map[room_id_to_client_id.at(id_in_room)] = true;
+          }
+
+          // Push the data to the video stream queue
+
+          uint64_t real_id = room_id_to_client_id.at(id_in_room);
+          video_stream_map.at(real_id).push(data);
+
+
+          if (video_stream_map.at(real_id).size() > 128) {
+            std::queue<std::string> emptyQueue;
+            video_stream_map.at(real_id).swap(emptyQueue);
+          } else if (video_stream_map.at(real_id).size() > 64) {
+            video_stream_map.at(real_id).pop();
+            // video_stream_map.at(real_id).pop();
+          }
+        }
+      }
+
+      // Check for lost ball by going through the video
+
+      for (auto &pair : video_stream_map) {
+        auto player = world_->GetPlayer(pair.first);
+        if (!valid_ball_map[pair.first]) {
+          // Clear the ball!
+          video_stream_map.erase(player->PlayerId());
+          for (auto it = room_id_to_client_id.begin();
+               it != room_id_to_client_id.end();) {
+            if (it->second == player->PlayerId()) {
+              it = room_id_to_client_id.erase(it);
+            } else {
+              ++it;
+            }
+          }
+          auto remove_unit_id = player->PrimaryUnitId();
+          world_->RemovePlayer(player->PlayerId());
+          world_->RemoveUnit(remove_unit_id);
+        }
+      }
     }
     std::cout << "Client stopped." << std::endl;
   }
@@ -116,11 +194,10 @@ GameBall::~GameBall() {
 
 void GameBall::OnInit() {
   auto world = logic_manager_->World();
-  global_mode = settings_.mode;
 
   if (settings_.mode == "client") {
     world->game_node_.is_server = false;
-    world->game_node_.initialize(settings_.port+1);
+    world->game_node_.initialize(settings_.self_port);
 
   } else if (settings_.mode == "room") {
     world->game_node_.is_server = true;
@@ -186,12 +263,16 @@ void GameBall::OnInit() {
     primary_player_id_ = primary_player->PlayerId();
 
     primary_player->SetPrimaryUnit(primary_unit->UnitId());
-    printf("Set ID!\n");
+
     world->game_node_.send("join", settings_.address, settings_.port);
     auto [msg, c_ip, c_port] = world->game_node_.receive();
 
     data_id = std::stoull(msg);
     printf("Login Finished!\n");
+
+    room_id_to_client_id[data_id] = primary_player->PlayerId();
+    video_stream_map[primary_player->PlayerId()] = std::queue<std::string>();
+
     std::thread t1(&GameBall::receivePackets, this);
     listen_thread = std::move(t1);
     listen_thread.detach();
@@ -234,9 +315,11 @@ void GameBall::OnCleanup() {
     listen_thread.join();
   }
 
-  if (settings_.mode == "client"){
-    auto world = logic_manager_->World();;
-    world->game_node_.send(std::to_string(data_id) + ":quit", settings_.address, settings_.port);
+  if (settings_.mode == "client") {
+    auto world = logic_manager_->World();
+    ;
+    world->game_node_.send(std::to_string(data_id) + ":quit", settings_.address,
+                           settings_.port);
   }
 }
 
@@ -256,13 +339,12 @@ void GameBall::OnUpdate() {
   if (settings_.mode == "client") {
     if (player_input != last_input) {
       last_input = player_input;
-      auto send_input = std::to_string(data_id) + ":" + PlayerInputToString(player_input);
-      logic_manager_->world_->game_node_.send(send_input, settings_.address, settings_.port);
+      auto send_input =
+          std::to_string(data_id) + ":" + PlayerInputToString(player_input);
+      logic_manager_->world_->game_node_.send(send_input, settings_.address,
+                                              settings_.port);
     }
   }
-
-  auto &client_list = logic_manager_->world_->player_map_;
-  auto ball_num = client_list.size();
 
   {
     std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
@@ -287,157 +369,25 @@ void GameBall::OnUpdate() {
           player->SetInput(inputPacket.input);
         }
       }
-    } else if (settings_.mode == "client") {
-      if (!video_stream.empty()) {
-        auto frame = video_stream.front();
-        video_stream.pop();
-        // Avoid too long queue
-        if (video_stream.size() > 128) {
-          std::queue<std::string> emptyQueue;
-          video_stream.swap(emptyQueue);
-        } else if (video_stream.size() > 64) {
-          video_stream.pop();
-          video_stream.pop();
-        }
-
-        std::stringstream ss(frame);
-        std::string tmp_str;
-        std::map<uint64_t, std::string> frameMap;
-
-        while (std::getline(ss, tmp_str, ',')) {
-          std::stringstream fs(tmp_str);
-          std::string idStr;
-          std::string data;
-          if (std::getline(fs, idStr, ':') && std::getline(fs, data)) {
-            uint64_t id = std::stoull(idStr);
-            frameMap[id] = data;
-          }
-        }
-
-        // Sync the picked frame to the game
-        // Sync the primary_user first
-
-        float ball_data[48];
-
-        if (ball_num > frameMap.size()) {
-          // Delete Balls
-          int64_t del_num = ball_num - frameMap.size();
-          for (auto &pair : client_list) {
-            if (del_num == 0)
-              break;
-            if (pair.second->PlayerId() == primary_player_id_)
-              continue;
-            auto player = pair.second;
-            auto _sphere_id = player->PrimaryUnitId();
-            auto &_sphere =
-                logic_manager_->world_->PhysicsWorld()->GetSphere(_sphere_id);
-            auto _regular_ball = dynamic_cast<Logic::Units::RegularBall *>(
-                logic_manager_->world_->GetUnit(_sphere_id));
-            logic_manager_->world_->UnregisterUnit(_sphere_id);
-            logic_manager_->world_->RemoveUnit(_sphere_id);
-            del_num--;
-          }
-        }
-        if (ball_num < frameMap.size()) {
-          // Add Balls
-          int64_t add_num = frameMap.size() - ball_num;
-          for (auto &pair : frameMap) {
-            if (add_num == 0)
-              break;
-            if (pair.first == primary_player_id_)
-              continue;
-            auto player = logic_manager_->world_->CreatePlayer();
-            auto unit =
-                logic_manager_->world_->CreateUnit<Logic::Units::RegularBall>(
-                    player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f,
-                    1.0f);
-            player->SetPrimaryUnit(unit->UnitId());
-            player->SetNetInfo(settings_.address, settings_.port);
-            add_num--;
-          }
-        }
-
-        if (ball_num == frameMap.size()) {
-          auto pri_player =
-              logic_manager_->world_->GetPlayer(primary_player_id_);
-          auto sphere_id = pri_player->PrimaryUnitId();
-          auto &sphere =
-              logic_manager_->world_->PhysicsWorld()->GetSphere(sphere_id);
-          auto regular_ball = dynamic_cast<Logic::Units::RegularBall *>(
-              logic_manager_->world_->GetUnit(sphere_id));
-
-          decode_state(frameMap[data_id], ball_data);
-          sphere.position.x = ball_data[0];
-          sphere.position.y = ball_data[1];
-          sphere.position.z = ball_data[2];
-          sphere.velocity.x = ball_data[3];
-          sphere.velocity.y = ball_data[4];
-          sphere.velocity.z = ball_data[5];
-          if(regular_ball == nullptr) std::cout<<"NULL"<<std::endl;
-          regular_ball->setAngularMomentum((glm::f32)ball_data[6],
-                                           (glm::f32)ball_data[7],
-                                           (glm::f32)ball_data[8]);
-          sphere.orientation[0][0] = (glm::f32)ball_data[9];
-          sphere.orientation[0][1] = (glm::f32)ball_data[10];
-          sphere.orientation[0][2] = (glm::f32)ball_data[11];
-          sphere.orientation[1][0] = (glm::f32)ball_data[12];
-          sphere.orientation[1][1] = (glm::f32)ball_data[13];
-          sphere.orientation[1][2] = (glm::f32)ball_data[14];
-          sphere.orientation[2][0] = (glm::f32)ball_data[15];
-          sphere.orientation[2][1] = (glm::f32)ball_data[16];
-          sphere.orientation[2][2] = (glm::f32)ball_data[17];
-
-          frameMap.erase(data_id);
-
-          // Sync the rest: frameMap and client_list
-          // Do not care about ID, just update them in any order. Pick ith frame
-          // to update ith client Iterate both maps
-          auto iter1 = frameMap.begin();
-          auto iter2 = client_list.begin();
-          while (iter1 != frameMap.end() && iter2 != client_list.end()) {
-            if (iter2->second->PlayerId() == primary_player_id_)
-              iter2++;
-            if (iter2 == client_list.end())
-              break;
-
-            // Update the client
-            auto player = iter2->second;
-            auto _sphere_id = player->PrimaryUnitId();
-            auto &_sphere =
-                logic_manager_->world_->PhysicsWorld()->GetSphere(_sphere_id);
-            auto _regular_ball = dynamic_cast<Logic::Units::RegularBall *>(
-                logic_manager_->world_->GetUnit(_sphere_id));
-
-            decode_state(iter1->second, ball_data);
-            _sphere.position.x = ball_data[0];
-            _sphere.position.y = ball_data[1];
-            _sphere.position.z = ball_data[2];
-            _sphere.velocity.x = ball_data[3];
-            _sphere.velocity.y = ball_data[4];
-            _sphere.velocity.z = ball_data[5];
-            _regular_ball->setAngularMomentum((glm::f32)ball_data[6],
-                                              (glm::f32)ball_data[7],
-                                              (glm::f32)ball_data[8]);
-            _sphere.orientation[0][0] = (glm::f32)ball_data[9];
-            _sphere.orientation[0][1] = (glm::f32)ball_data[10];
-            _sphere.orientation[0][2] = (glm::f32)ball_data[11];
-            _sphere.orientation[1][0] = (glm::f32)ball_data[12];
-            _sphere.orientation[1][1] = (glm::f32)ball_data[13];
-            _sphere.orientation[1][2] = (glm::f32)ball_data[14];
-            _sphere.orientation[2][0] = (glm::f32)ball_data[15];
-            _sphere.orientation[2][1] = (glm::f32)ball_data[16];
-            _sphere.orientation[2][2] = (glm::f32)ball_data[17];
-
-            iter1++;
-            iter2++;
-          }
-        }
-      }
     }
 
     if (settings_.mode == "room") {
       float ball_data[48];
       std::string msg_broadcast;
+
+      while (!remove_queue.empty()) {
+        auto remove_player_id = remove_queue.front();
+        auto remove_unit_id =
+            logic_manager_->world_->GetPlayer(remove_player_id)
+                ->PrimaryUnitId();
+        remove_queue.pop();
+        logic_manager_->world_->RemovePlayer(remove_player_id);
+        logic_manager_->world_->RemoveUnit(remove_unit_id);
+
+        std::cout << "Player " << remove_player_id << " quit." << std::endl;
+      }
+
+      auto &client_list = logic_manager_->world_->player_map_;
 
       for (auto &pair : client_list) {
         auto player = pair.second;
@@ -483,21 +433,28 @@ void GameBall::OnUpdate() {
       }
     }
 
-    std::queue<Actor *> actors_to_remove;
+    // std::queue<Actor *> actors_to_remove;
+    std::queue<uint64_t> actors_to_remove;
     for (auto &actor : actors_) {
       if (actor.second->SyncedLogicWorldVersion() ==
           synced_logic_world_version_) {
         actor.second->Update(delta_time);
       } else {
-        actors_to_remove.push(actor.second);
+        // actors_to_remove.push(actor.second);
+        actors_to_remove.push(actor.first);
       }
     }
 
     while (!actors_to_remove.empty()) {
-      auto actor = actors_to_remove.front();
+      // auto actor = actors_to_remove.front();
+      auto actor_id = actors_to_remove.front();
       actors_to_remove.pop();
-      actors_.erase(actor->SyncedLogicWorldVersion());
-      delete actor;
+      // actors_.erase(actor->SyncedLogicWorldVersion());
+      auto remove_actor_pointer = actors_.at(actor_id);
+      actors_.erase(actor_id);
+      // delete actor;
+      if (!remove_actor_pointer)
+        delete remove_actor_pointer;
     }
 
     auto actor = GetActor(primary_player_primary_unit_object_id_);

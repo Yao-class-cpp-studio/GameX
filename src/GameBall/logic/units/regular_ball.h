@@ -30,7 +30,6 @@ class RegularBall : public Unit {
   glm::vec3 Velocity() const;
   glm::mat3 Orientation() const;
   glm::vec3 AngularMomentum() const;
-  void setAngularMomentum(glm::f32 a, glm::f32 b, glm::f32 c);
 
  private:
   float radius_{1.0f};

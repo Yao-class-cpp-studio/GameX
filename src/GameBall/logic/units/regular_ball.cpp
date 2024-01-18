@@ -2,8 +2,14 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
+#include "GameBall/core/packet_tool.h"
 
-extern bool is_server;
+extern uint8_t app_type;
+
+namespace GameBall{
+  std::map<uint64_t, std::queue<std::string>> video_stream_map;
+  std::map<uint64_t, uint64_t> room_id_to_client_id;
+}
 
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
@@ -45,7 +51,9 @@ void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
-  if(is_server){
+
+  if (app_type != 1){
+    // Room / Local Update Scheme
     if (position_.y < -10.0f) {
       position_ =
           glm::vec3{0.0f, 10.0f, 0.0f};
@@ -101,6 +109,37 @@ void RegularBall::UpdateTick() {
         }
       }
     }
+  }else{
+
+    // Client Update Scheme
+    auto owner = world_->GetPlayer(player_id_);
+    if (!video_stream_map.at(player_id_).empty()){
+      auto frame = video_stream_map.at(player_id_).front();
+      video_stream_map.at(player_id_).pop();
+
+      float frame_data[18];
+      decode_state(frame, frame_data);
+
+      sphere.position.x = frame_data[0];
+      sphere.position.y = frame_data[1];
+      sphere.position.z = frame_data[2];
+      sphere.velocity.x = frame_data[3];
+      sphere.velocity.y = frame_data[4];
+      sphere.velocity.z = frame_data[5];
+      augular_momentum_.x = (glm::f32)frame_data[6];
+      augular_momentum_.y = (glm::f32)frame_data[7];
+      augular_momentum_.z = (glm::f32)frame_data[8];
+      sphere.orientation[0][0] = (glm::f32)frame_data[9];
+      sphere.orientation[0][1] = (glm::f32)frame_data[10];
+      sphere.orientation[0][2] = (glm::f32)frame_data[11];
+      sphere.orientation[1][0] = (glm::f32)frame_data[12];
+      sphere.orientation[1][1] = (glm::f32)frame_data[13];
+      sphere.orientation[1][2] = (glm::f32)frame_data[14];
+      sphere.orientation[2][0] = (glm::f32)frame_data[15];
+      sphere.orientation[2][1] = (glm::f32)frame_data[16];
+      sphere.orientation[2][2] = (glm::f32)frame_data[17];
+    }
+
   }
 
 
@@ -166,11 +205,6 @@ glm::mat3 RegularBall::Orientation() const {
 
 glm::vec3 RegularBall::AngularMomentum() const {
   return augular_momentum_;
-}
-void RegularBall::setAngularMomentum(const glm::f32 a, const glm::f32 b, const glm::f32 c) {
-  augular_momentum_[0] = a;
-  augular_momentum_[1] = b;
-  augular_momentum_[2] = c;
 }
 
 }  // namespace GameBall::Logic::Units

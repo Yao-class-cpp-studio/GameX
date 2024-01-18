@@ -19,7 +19,7 @@ P2PNode::~P2PNode() {
   WSACleanup();
 }
 
-void P2PNode::initialize(int port) {
+void P2PNode::initialize(uint8_t port) {
   if (is_initialized) {
     std::cerr << "Node is already initialized." << std::endl;
     return;
@@ -47,7 +47,7 @@ void P2PNode::initialize(int port) {
   is_initialized = true;
 }
 
-void P2PNode::send(const std::string& message, const std::string& ip, uint16_t port) const {
+void P2PNode::send(const std::string& message, const std::string& ip, uint8_t port) const {
   if (!is_initialized) {
     printf("Node is not initialized.\n");
     return;
@@ -63,7 +63,7 @@ void P2PNode::send(const std::string& message, const std::string& ip, uint16_t p
          (struct sockaddr *)&dest_addr, sizeof(dest_addr));
 }
 
-std::tuple<std::string, std::string, uint16_t> P2PNode::receive() {
+std::tuple<std::string, std::string, uint8_t> P2PNode::receive() {
   if (!is_initialized) {
     printf("Node is not initialized.\n");
     return std::make_tuple("", "", 0);
@@ -110,7 +110,7 @@ P2PNode::~P2PNode(){
   closeConnection();
 }
 
-void P2PNode::initialize(int port) {
+void P2PNode::initialize(uint8_t port) {
   if (is_initialized) {
     std::cerr << "Node is already initialized." << std::endl;
     return;
@@ -135,7 +135,7 @@ void P2PNode::initialize(int port) {
   is_initialized = true;
 }
 
-void P2PNode::send(const std::string& message, const std::string& ip, uint16_t port) const {
+void P2PNode::send(const std::string& message, const std::string& ip, uint8_t port) const {
   if (!is_initialized) {
     std::cerr << "Node is not initialized." << std::endl;
     return;
@@ -151,7 +151,7 @@ void P2PNode::send(const std::string& message, const std::string& ip, uint16_t p
          (struct sockaddr *)&dest_addr, sizeof(dest_addr));
 }
 
-std::tuple<std::string, std::string, uint16_t> P2PNode::receive() {
+std::tuple<std::string, std::string, uint8_t> P2PNode::receive() {
   if (!is_initialized) {
     std::cerr << "Node is not initialized." << std::endl;
     return std::make_tuple("", "", 0);

@@ -56,15 +56,15 @@ class P2PNode {
 
   P2PNode();
 
-  void initialize(int port);
+  void initialize(u_int8_t port);
 
   bool isInited() const;
 
   ~P2PNode();
 
-  void send(const std::string& message, const std::string& ip, uint16_t port) const;
+  void send(const std::string& message, const std::string& ip, uint8_t port) const;
 
-  std::tuple<std::string, std::string, uint16_t> receive();
+  std::tuple<std::string, std::string, uint8_t> receive();
 
   void closeConnection();
 

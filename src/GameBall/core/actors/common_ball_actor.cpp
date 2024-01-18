@@ -13,6 +13,7 @@ CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
 
 CommonBallActor::~CommonBallActor() {
   if (entity_) {
+    entity_->SetAlbedoImage(nullptr);
     app_->Scene()->DestroyEntity(entity_.get());
     entity_ = nullptr;
   }
