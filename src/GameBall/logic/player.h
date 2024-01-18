@@ -20,6 +20,8 @@ class Player {
 
   PlayerInput TakePlayerInput();
 
+  bool is_enemy;
+
  private:
   World *world_;
   uint64_t player_id_{};
