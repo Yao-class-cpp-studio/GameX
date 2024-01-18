@@ -72,9 +72,13 @@ void RegularBall::UpdateTick() {
       moving_direction += forward;
     }
     if (input.jump) {
-      if (sphere.position.y <= 1 && sphere.position.y >= 0) {
+      if (timer_== 0) {
         sphere.velocity += glm::vec3{0.0f, 7.0f, 0.0f};
+        timer_ = 96;
       }
+    }
+    if (timer_) {
+      timer_--;
     }
     if (input.quit) {
       exit(0);
@@ -120,9 +124,13 @@ void RegularBall::UpdateTick() {
        moving_direction += forward;
     }
     if (input.jump1) {
-       if (sphere.position.y <= 1 && sphere.position.y >= 0) {
+       if (timer_ == 0) {
         sphere.velocity += glm::vec3{0.0f, 7.0f, 0.0f};
+        timer_ = 96;
        }
+    }
+    if (timer_) {
+       timer_--;
     }
     if (input.quit) {
        exit(0);
