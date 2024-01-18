@@ -71,6 +71,8 @@ class GameBall : public GameX::Base::Application {
 
   uint64_t primary_player_id_{0};
   uint64_t primary_player_primary_unit_object_id_{0};
+  uint64_t large_player_id_{0};
+  uint64_t small_player_id_{0};
 
   bool ignore_next_mouse_move_{true};
 
