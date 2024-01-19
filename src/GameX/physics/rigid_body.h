@@ -16,5 +16,7 @@ struct RigidBody {
   glm::vec3 gravity{0.0f, -9.8f, 0.0f};
   float friction{0.0f};
   float elasticity{0.0f};
+
+  float flip_gravity_lapsed{0.0f};
 };
 }  // namespace GameX::Physics
