@@ -47,6 +47,8 @@ class GameBall : public GameX::Base::Application {
 
   void CursorPosCallback(double xpos, double ypos) override;
 
+  void ScrollCallback(double xoffset, double yoffset) override;
+
   CameraControllerThirdPerson *CameraController() {
     return camera_controller_.get();
   }
