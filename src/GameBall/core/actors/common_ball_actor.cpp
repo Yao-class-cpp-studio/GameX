@@ -50,7 +50,7 @@ CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
     } else {
             std::cout<<
                 "We only have 7 textures, namely blue1, blue2, "<<
-                "white, orange, tile, grey, and Moon.Please choose again.\n";
+                "white, orange, tile, grey, and Moon. Please choose again.\n";
     } 
   }
   count++;

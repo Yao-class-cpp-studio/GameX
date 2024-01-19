@@ -42,7 +42,7 @@ void GameBall::OnInit() {
   auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
       primary_player->PlayerId(), glm::vec3{20.0f, 21.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{15.0f, 21.0f, 0.0f}, 1.0f, 1.0f);
+      enemy_player->PlayerId(), glm::vec3{0.0f, 21.0f, -20.0f}, 1.0f, 1.0f);
   auto large_unit = world->CreateUnit<Logic::Units::RegularBall>(
       large_player->PlayerId(), glm::vec3{-30.0f, 2.0f, 0.0f}, 2.0f, 6.0f);
   auto small_unit = world->CreateUnit<Logic::Units::RegularBall>(
