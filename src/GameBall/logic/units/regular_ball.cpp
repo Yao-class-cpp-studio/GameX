@@ -1,7 +1,9 @@
 #include "GameBall/logic/units/regular_ball.h"
 
 #include "GameBall/core/game_ball.h"
+#include "GameBall/logic/events.h"
 #include "GameBall/logic/world.h"
+#include "IrrKlang/PlaySound.h"
 
 namespace GameBall::Logic::Units {
 RegularBall::RegularBall(World *world,
@@ -81,12 +83,14 @@ void RegularBall::UpdateTick() {
         sphere.type = (sphere.type - 1) < 0 ? 2 : (sphere.type - 1);
         last_change_time = cur_time;
         LAND_INFO("Sphere changed into type {}.", sphere.type);
+        PlaySound::Play(R"(../../../assets/audio/pop.mp3)");
       }
       if (input.right_arrow && (cur_time - last_change_time >= 1.0) &&
           sphere.radius == 1.0f) {
         sphere.type = (sphere.type + 1) % 3;
         last_change_time = cur_time;
         LAND_INFO("Sphere changed into type {}.", sphere.type);
+        PlaySound::Play(R"(../../../assets/audio/pop.mp3)");
       }
       if (input.shrink && (cur_time - last_change_time >= 1.0) &&
           sphere.radius > 0.25f) {
@@ -107,9 +111,11 @@ void RegularBall::UpdateTick() {
         LAND_INFO("Sphere enlarged.");
       }
       if (input.brake) {
+        PlaySound::Play(R"(../../../assets/audio/brake.mp3)");
         sphere.angular_velocity *= 0.7f;
         input.speed_up = false;
       } else if (input.speed_up) {
+        PlaySound::Play(R"(../../../assets/audio/acce.mp3)");
         sphere.velocity *= std::pow(3 * delta_v, delta_time);
         sphere.angular_velocity *= std::pow(3 * delta_av, delta_time);
       } else {
@@ -119,6 +125,7 @@ void RegularBall::UpdateTick() {
       restart = input.restart || sphere.position.y <= -7.0f;
       if (restart) {
         LAND_INFO("You LOSE~");
+        PlaySound::Play(R"(../../../assets/audio/lose.mp3)");
         sphere.position = glm::vec3{0.0f, sphere.radius + 0.1f, 0.0f};
       }
 
@@ -159,6 +166,7 @@ void RegularBall::UpdateTick() {
       sphere.angular_velocity *= std::pow(delta_av, delta_time);
       if (sphere.position.y <= -7.0f) {
         LAND_INFO("You WON!!");
+        PlaySound::Play(R"(../../../assets/audio/win.mp3)");
         sphere.position = glm::vec3{-5.0f, sphere.radius + 0.1f, 0.0f};
         restart = true;
       }
