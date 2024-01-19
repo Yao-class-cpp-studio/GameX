@@ -1,4 +1,5 @@
 #include "GameBall/logic/logic.h"
+#include "IrrKlang/PlaySound.h"
 
 namespace GameBall::Logic {
 
@@ -17,11 +18,14 @@ class World *Manager::World() const {
 }
 
 void Manager::Start() {
+  PlaySound::InitSoundEngine();
+  PlaySound::Play(R"(../../../assets/audio/background.mp3)", true);
   logic_thread_ = std::thread(&Manager::LogicThread, this);
 }
 
 void Manager::Stop() {
   stop_signal_ = true;
+  PlaySound::ReleaseSoundEngine();
   logic_thread_.join();
 }
 

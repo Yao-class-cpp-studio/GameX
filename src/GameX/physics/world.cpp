@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "GameX/physics/collision.h"
+#include "IrrKlang/PlaySound.h"
 
 namespace GameX::Physics {
 World::World() {
@@ -53,6 +54,7 @@ void World::SolveCollisions() {
       if (DetectCollision(sphere1.second, sphere2.second, collision)) {
         collision_pairs.emplace_back(&sphere1.second, &sphere2.second,
                                      collision);
+        PlaySound::Play(R"(../../../assets/audio/collision.mp3)");
       }
     }
     for (auto &cube : cubes_) {
