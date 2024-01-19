@@ -59,7 +59,7 @@ void RegularBall::UpdateTick() {
       float angular_acceleration = glm::radians(2880.0f);
 
       if (input.move_forward) {
-        moving_direction -= right;
+        moving_direction -=right;
       }
       if (input.move_backward) {
         moving_direction += right;
