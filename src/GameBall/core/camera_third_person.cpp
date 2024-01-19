@@ -99,4 +99,8 @@ void CameraControllerThirdPerson::CursorMove(float x, float y) {
   dst_pitch_ += y * 0.1f;
   dst_pitch_ = glm::clamp(dst_pitch_, -89.0f, 89.0f);
 }
+
+void CameraControllerThirdPerson::CursorScroll(float x, float y) {
+  dst_distance_ += y * 0.5f;
+}
 }  // namespace GameBall
