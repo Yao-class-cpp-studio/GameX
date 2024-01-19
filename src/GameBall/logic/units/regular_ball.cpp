@@ -70,16 +70,30 @@ void RegularBall::UpdateTick() {
        if (input.move_right) {
          moving_direction += forward;
        }
+
+	   float acceleration_multiplier = 1;
+	   if (input.accelerate) {
+	      acceleration_multiplier = 1.5;
+	   }
   
        if (glm::length(moving_direction) > 0.0f) {
          moving_direction = glm::normalize(moving_direction);
          sphere.angular_velocity +=
-             moving_direction * angular_acceleration * delta_time;
+             acceleration_multiplier * moving_direction * angular_acceleration * delta_time;
        }
   
        if (input.brake) {
          sphere.angular_velocity = glm::vec3{0.0f};
        }
+
+	   if (input.flip_gravity) {
+		  if (sphere.flip_gravity_lapsed >= delta_time * 8) {
+	         sphere.gravity = sphere.gravity * float(-1);
+		  }
+		  sphere.flip_gravity_lapsed = 0;
+	   }
+	   
+	   sphere.flip_gravity_lapsed += delta_time;
      }
    }
 
