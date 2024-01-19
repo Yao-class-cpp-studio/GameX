@@ -4,7 +4,7 @@
 #include "GameBall/logic/world.h"
 
 namespace GameBall::Logic::Obstacles {
-
+short count=0;
 Block::Block(World *world,
              glm::vec3 position,
              float mass,
@@ -22,7 +22,7 @@ Block::Block(World *world,
   SetMass(mass_);
   SetSideLength(side_length_);
   SetMotion(position_, velocity_, orientation_, L_);
-  cube.elasticity = 0.25f;
+  cube.elasticity = 0.5f;
   cube.friction = 0.5f;
 }
 
@@ -32,12 +32,53 @@ SYNC_ACTOR_FUNC(Block) {
   actor->SetInertiaTensor(J_);
   actor->SetGravity(gravity_);
   actor->SetMotion(position_, velocity_, orientation_, L_);
-  if (ActorInitialize()) {
-    actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+  if (ActorInitialize())
+  if (count <2) {
+    std::cout << "Choose a setting:\n";
+    char input;
+    std::cin >> input;
+    switch (input) {
+      case '1':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_ao_2k.jpg"));
+        break;
+      case '2':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_arm_2k.jpg"));
+        break;
+      case '3':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_diff_2k.jpg"));
+        break;
+      case '4':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_disp_2k.jpg"));
+        break;
+      case '5':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_nor_dx_2k.jpg"));
+        break;
+      case '6':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_nor_gl_2k.jpg"));
+        break;
+      case '7':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_rough_2k.jpg"));
+        break;
+      case '8':
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_spec_2k.jpg"));
+        break;
+      default:
+        actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
+            "textures/floor_tiles_06_2k/floor_tiles_06_diff_2k.jpg"));
+    }
+    count++;
+    } else 
+      actor->Entity()->SetAlbedoImage(app->AssetManager()->ImageFile(
         "textures/floor_tiles_06_2k/floor_tiles_06_diff_2k.jpg"));
-  }
-}
-
+    }
 void Block::SetMass(float mass) {
   auto physics_world = world_->PhysicsWorld();
   auto &cube = physics_world->GetCube(cude_id_);

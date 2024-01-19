@@ -19,6 +19,27 @@ PlayerInput PlayerInputController::GetInput() {
   auto yaw = pitch_yaw.y;
   input_.orientation = {glm::sin(glm::radians(yaw)), 0.0f,
                         -glm::cos(glm::radians(yaw))};
+  input_.v_jump = (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS);
+  input_.low = (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS);
+  input_.high = (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS);
+  input_.return_if_too_light =
+      (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);  // 2 chances of returning to the base
+  //changed to enable the judgement of winning or not.
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    R_pressed_now = R_pressed_before = true;
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE && R_pressed_before &&
+      R_pressed_now) {
+    R_pressed_now = false;
+    count_chances++;
+  }
+  input_.halt = (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS);
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+    T_pressed_now = true;
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE && T_pressed_now)
+    T_pressed_now = !T_pressed_now, T_pressed_before = !T_pressed_before;
+  input_.restart_halt = T_pressed_before;
+  input_.end_if_too_heavy = (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS);
+  input_.end = (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS);
   auto result = input_;
   input_ = {};
   return result;

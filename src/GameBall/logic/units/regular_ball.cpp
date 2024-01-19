@@ -3,7 +3,14 @@
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
 
+#include<termios.h>
+#include <unistd.h>
+
 namespace GameBall::Logic::Units {
+short count_ret = 0, count_fallen=0;//count how many times R is pressed.
+//count how many balls have fallen
+float Y1=0.0f;//record the position of the enemy spheres
+const short number_of_balls = 3;
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
                          const glm::vec3 &position,
@@ -45,44 +52,123 @@ void RegularBall::UpdateTick() {
   auto physics_world = world_->PhysicsWorld();
   auto &sphere = physics_world->GetSphere(sphere_id_);
 
-  //  auto owner = world_->GetPlayer(player_id_);
-  //  if (owner) {
-  //    if (UnitId() == owner->PrimaryUnitId()) {
-  //      auto input = owner->TakePlayerInput();
-  //
-  //      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
-  //      glm::vec3 right =
-  //          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
-  //
-  //      glm::vec3 moving_direction{};
-  //
-  //      float angular_acceleration = glm::radians(2880.0f);
-  //
-  //      if (input.move_forward) {
-  //        moving_direction -= right;
-  //      }
-  //      if (input.move_backward) {
-  //        moving_direction += right;
-  //      }
-  //      if (input.move_left) {
-  //        moving_direction -= forward;
-  //      }
-  //      if (input.move_right) {
-  //        moving_direction += forward;
-  //      }
-  //
-  //      if (glm::length(moving_direction) > 0.0f) {
-  //        moving_direction = glm::normalize(moving_direction);
-  //        sphere.angular_velocity +=
-  //            moving_direction * angular_acceleration * delta_time;
-  //      }
-  //
-  //      if (input.brake) {
-  //        sphere.angular_velocity = glm::vec3{0.0f};
-  //      }
-  //    }
-  //  }
+  auto owner = world_->GetPlayer(player_id_);
+  if (owner) {
+    if (UnitId() == owner->PrimaryUnitId()) {
+      auto input = owner->TakePlayerInput();
 
+      glm::vec3 forward = glm::normalize(glm::vec3{input.orientation});
+      glm::vec3 right =
+          glm::normalize(glm::cross(forward, glm::vec3{0.0f, 1.0f, 0.0f}));
+
+      glm::vec3 moving_direction{};
+
+      float angular_acceleration = glm::radians(2880.0f);
+      if (!input.restart_halt) {
+        if (input.move_forward) {
+          moving_direction -= right;
+        }
+        if (input.move_backward) {
+          moving_direction += right;
+        }
+        if (input.move_left) {
+          moving_direction -= forward;
+        }
+        if (input.move_right) {
+          moving_direction += forward;
+        }
+
+        if (glm::length(moving_direction) > 0.0f) {
+          moving_direction = glm::normalize(moving_direction);
+          sphere.angular_velocity +=
+              moving_direction * angular_acceleration * delta_time;
+        }
+        if (input.brake && std::abs(sphere.velocity.y)>=0.01f) {
+          sphere.angular_velocity = glm::vec3{0.0f};
+        }
+
+        if (input.low) {
+          sphere.mass *= 0.9f;
+        }
+
+        if (input.high && std::abs(sphere.position.x) < 5.0f &&
+            std::abs(sphere.position.z) < 5.0f &&
+            std::abs(sphere.position.y - 1.0f) < 0.01f) {
+          sphere.mass *= 1.1f;
+        }
+        if (input.v_jump) {
+          if (std::abs(sphere.position.y - 1.0f) < 0.01f ||
+              std::abs(sphere.position.y - 21.0f) < 
+                  0.01f ||
+                  (std::abs(sphere.position.y - 7.0f) < 0.01f && std ::
+              abs(sphere.position.z)<2.25f&&std::abs(sphere.position.x+35.0f)<2.25f))
+            sphere.velocity.y = 10.0f;
+        }
+        if (input.return_if_too_light) {
+          if (sphere.mass <= 0.50f && count_ret < 2) {
+            sphere.position.y = 1.00f;
+            sphere.position.x = 0.00f;
+            sphere.position.z = 0.00f;
+            sphere.mass = 1.0f;
+          }
+          count_ret++;
+        }
+
+        if (input.end_if_too_heavy && sphere.mass >= 2.0f) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
+          exit(0);
+        }
+        if (input.halt) {
+          std::cout << "Exit?(Y/n)\n";
+          char c;
+          std::cin >> c;
+          if (c == 'Y' || c == 'y') {
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            exit(0);  // This exit is more stable
+          }
+          std::cout << "______________Halting______________\n";
+          std::cout << "Please enter a 4-digit password:\n";
+          termios oldt;
+          tcgetattr(STDIN_FILENO, &oldt);
+          termios newt=oldt;
+          newt.c_lflag &= ~ECHO;
+          tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+          std::string password, enter;
+          char p;
+          int length = 4;
+          for (int i = 0; i < length; i++)
+            std::cin >> p, password += p;
+          std::cout << "Successfully memorized password, enter again to "
+                       "restart the game:\n";
+          int i;
+          for (i = 0; i < 3; i++) {
+            std::cin >> enter;
+            if (enter == password) {
+              input.halt = false;
+              tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              break;
+            } else if (i < 2)
+              std::cout << "Enter again:\n";
+          }
+          if (i == 3) {
+            std::cout << "Sorry, but we have to stop now.\n";
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            sleep(5000);  // Linux:sleep(5000)
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            exit(0);
+          }
+        }
+        if (input.end) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
+          exit(0);
+        }
+      } else {
+        glm::vec3 zero_v{0.0f};
+        sphere.velocity = zero_v;
+        sphere.angular_velocity *= 0;
+      }
+    }
+  }
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
@@ -90,6 +176,35 @@ void RegularBall::UpdateTick() {
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
+
+  if (owner) {
+    if (UnitId() != owner->PrimaryUnitId()) {
+      Y1 = sphere.position.y;
+      if (Y1 < 0.50f) {
+        world_->RemovePlayer(player_id_);
+        count_fallen++;
+      }
+      if (UnitId() == owner->SmallUnitId() && sphere.position.x <= -32.75f &&
+          sphere.position.x >= -37.25f &&
+          std::abs(sphere.position.z) <= 2.25f) {
+        world_->RemovePlayer(owner->PrimaryUnitId());
+        std::cerr << "You have lost the game!";
+         sleep(3000);
+        exit(0);
+      }
+    } else if (Y1 > sphere.position.y + 10.0f&&sphere.position.y>0.99f ||
+               sphere.position.y < 0.0f && count_ret >= 2) {
+      world_->RemovePlayer(owner->PrimaryUnitId());
+      std::cerr << "You have lost the game!";
+      sleep(3000);
+      exit(0);
+    } else if (Y1>0.0f&&count_fallen==number_of_balls) {
+      world_->RemovePlayer(owner->PrimaryUnitId());
+      std::cerr << "$$$$$$@@@@@@You have won the game!@@@@@@$$$$$$";
+      sleep(10000);
+      exit(0);
+    }
+  }
 }
 
 void RegularBall::SetMass(float mass) {

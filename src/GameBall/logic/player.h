@@ -12,7 +12,15 @@ class Player {
 
   uint64_t PrimaryUnitId() const;
 
+  uint64_t LargeUnitId() const;
+
+  uint64_t SmallUnitId() const;
+
   void SetPrimaryUnit(uint64_t unit_id);
+
+  void SetLargeUnit(uint64_t unit_id);
+
+  void SetSmallUnit(uint64_t unit_id);
 
   void SetInput(const PlayerInput &input);
 
@@ -25,6 +33,8 @@ class Player {
   uint64_t player_id_{};
 
   uint64_t primary_unit_id_{};
+  uint64_t large_unit_id_{};
+  uint64_t small_unit_id_{};
 
   PlayerInput input_{};
 };
