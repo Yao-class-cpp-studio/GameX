@@ -83,8 +83,7 @@ void RegularBall::UpdateTick() {
           sphere.angular_velocity +=
               moving_direction * angular_acceleration * delta_time;
         }
-        if (input.brake && sphere.position.y < 1.01f &&
-            sphere.position.y > 0.99f) {
+        if (input.brake && std::abs(sphere.velocity.y)>=0.01f) {
           sphere.angular_velocity = glm::vec3{0.0f};
         }
 
@@ -98,7 +97,11 @@ void RegularBall::UpdateTick() {
           sphere.mass *= 1.1f;
         }
         if (input.v_jump) {
-          if (sphere.position.y < 1.01f && sphere.position.y > 0.99f)
+          if (std::abs(sphere.position.y - 1.0f) < 0.01f ||
+              std::abs(sphere.position.y - 21.0f) < 
+                  0.01f ||
+                  (std::abs(sphere.position.y - 7.0f) < 0.01f && std ::
+              abs(sphere.position.z)<2.25f&&std::abs(sphere.position.x+35.0f)<2.25f))
             sphere.velocity.y = 10.0f;
         }
         if (input.return_if_too_light) {
@@ -189,7 +192,7 @@ void RegularBall::UpdateTick() {
          sleep(3000);
         exit(0);
       }
-    } else if (Y1 > sphere.position.y + 10.0f ||
+    } else if (Y1 > sphere.position.y + 10.0f&&sphere.position.y>0.99f ||
                sphere.position.y < 0.0f && count_ret >= 2) {
       world_->RemovePlayer(owner->PrimaryUnitId());
       std::cerr << "You have lost the game!";
