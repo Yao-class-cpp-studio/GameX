@@ -18,7 +18,7 @@ const int MAX_PLAYER = 5;
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
 
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <netdb.h>
@@ -33,7 +33,7 @@ class p2pnode {
  private:
 #ifdef _WIN32
   SOCKET sockfd;
-#elif __APPLE__
+#elif __APPLE__ || __linux__
   int sockfd;
 #endif
   bool is_initialized;

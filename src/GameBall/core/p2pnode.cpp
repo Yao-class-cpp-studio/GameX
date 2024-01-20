@@ -100,7 +100,7 @@ bool p2pnode::isInit() const {
   return is_initialized;
 }
 
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 p2pnode::p2pnode() : is_initialized(false), is_server(false), sockfd(-1) {}
 
 p2pnode::~p2pnode(){
@@ -207,7 +207,7 @@ std::vector<std::string> localIPs() {
 
   return ips;
 }
-#elif __APPLE__
+#elif __APPLE__ || __linux__
 
 #define NI_MAXHOST 1025
 // macOS implementation
