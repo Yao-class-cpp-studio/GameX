@@ -1,6 +1,8 @@
 file(GLOB_RECURSE SOURCES *.cpp *.h)
 
-add_executable(GameBall ${SOURCES})
+add_executable(GameBall ${SOURCES}
+        core/p2pnode.cpp
+        core/p2pnode.h)
 target_link_libraries(GameBall PRIVATE GameX absl::flags absl::flags_parse)
 
 # Delete main.cpp from sources

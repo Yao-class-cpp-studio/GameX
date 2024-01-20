@@ -52,6 +52,8 @@ class GameBall : public GameX::Base::Application {
     return camera_controller_.get();
   }
 
+  void receivePackets();
+
  private:
   friend class Logic::Manager;
   friend class Logic::World;
