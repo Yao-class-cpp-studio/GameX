@@ -70,6 +70,12 @@ void RegularBall::UpdateTick() {
        if (input.move_right) {
          moving_direction += forward;
        }
+       if(input.rotate_left) {
+          moving_direction +=glm::normalize(glm::vec3{0.0f, 1.0f, 0.0f});
+       }
+       if(input.rotate_right) {
+          moving_direction -=glm::normalize(glm::vec3{0.0f, 1.0f, 0.0f});
+       }
   
        if (glm::length(moving_direction) > 0.0f) {
          moving_direction = glm::normalize(moving_direction);

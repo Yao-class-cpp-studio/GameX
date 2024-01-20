@@ -12,6 +12,8 @@ PlayerInput PlayerInputController::GetInput() {
   input_.move_backward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
   input_.move_left = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
   input_.move_right = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
+  input_.rotate_left=(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS);
+  input_.rotate_right=(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS);
   input_.brake = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
   auto camera_controller = app_->CameraController();
   auto pitch_yaw = camera_controller->GetPitchYaw();
