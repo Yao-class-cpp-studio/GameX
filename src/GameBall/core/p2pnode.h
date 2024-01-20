@@ -10,8 +10,8 @@ const int MAX_PLAYER = 5;
 #include <tuple>
 
 #ifdef _WIN32
-#include <Ws2tcpip.h>
-#include <winsock2.h>
+#include <WS2tcpip.h>
+#include <WinSock2.h>
 #include <iphlpapi.h>
 
 #include <thread>
@@ -37,13 +37,13 @@ class p2pnode {
   int sockfd;
 #endif
   bool is_initialized;
-  struct sockaddr_in addr;
+  sockaddr_in addr;
 
  public:
   p2pnode();
   ~p2pnode();
   void initialize(uint16_t port);
-  bool isInit() const;
+  [[nodiscard]] bool isInit() const;
   void send(const std::string &mes, const std::string &ip, uint16_t port) const;
   [[nodiscard]] std::tuple<std::string, std::string, uint16_t> receive() const;
   void closeConnection();
