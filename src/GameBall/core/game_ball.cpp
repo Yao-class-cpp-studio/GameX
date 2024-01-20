@@ -136,6 +136,7 @@ void GameBall::OnRender() {
 
   OutputImage(cmd_buffer->Handle(), film_->output_image.get());
 }
+
 void GameBall::CursorPosCallback(double xpos, double ypos) {
   static double last_xpos = xpos;
   static double last_ypos = ypos;
@@ -149,6 +150,13 @@ void GameBall::CursorPosCallback(double xpos, double ypos) {
     camera_controller_->CursorMove(dx, dy);
   }
 
+  ignore_next_mouse_move_ = false;
+}
+
+void GameBall::ScrollCallback(double xoffset, double yoffset) {
+  if (!ignore_next_mouse_move_) {
+    camera_controller_->CursorScroll(xoffset, yoffset);
+  }
   ignore_next_mouse_move_ = false;
 }
 
