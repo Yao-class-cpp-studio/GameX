@@ -107,7 +107,7 @@ p2pnode::~p2pnode(){
   closeConnection();
 }
 
-void p2pnode::initialize(int port) {
+void p2pnode::initialize(uint16_t port) {
   if (is_initialized) {
     std::cerr << "Node is already initialized." << std::endl;
     return;
@@ -148,7 +148,7 @@ void p2pnode::send(const std::string& mes, const std::string& ip, uint16_t port)
          (struct sockaddr *)&dest_addr, sizeof(dest_addr));
 }
 
-std::tuple<std::string, std::string, uint16_t> p2pnode::receive() {
+std::tuple<std::string, std::string, uint16_t> p2pnode::receive() const{
   if (!is_initialized) {
     std::cerr << "Node is not initialized." << std::endl;
     return std::make_tuple("", "", 0);
@@ -176,7 +176,7 @@ void p2pnode::closeConnection() {
   }
 }
 
-bool p2pnode::isInited() const {
+bool p2pnode::isInit() const {
   return is_initialized;
 }
 #endif
