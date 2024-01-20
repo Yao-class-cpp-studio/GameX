@@ -33,6 +33,8 @@ class CameraControllerThirdPerson {
 
   void CursorMove(float x, float y);
 
+  void CursorScroll(float x,float y);
+
  private:
   GameX::Graphics::PCamera camera_;
   float dst_distance_{10.0f};
