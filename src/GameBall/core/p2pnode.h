@@ -37,7 +37,7 @@ class p2pnode {
   int sockfd;
 #endif
   bool is_initialized;
-  sockaddr_in addr;
+  struct sockaddr_in addr;
 
  public:
   p2pnode();
