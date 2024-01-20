@@ -306,7 +306,7 @@ void GameBall::OnCleanup() {
 
     auto remove_actor_pointer = actors_.at(actor_id);
     actors_.erase(actor_id);
-    if (!remove_actor_pointer)
+    if (remove_actor_pointer)
       delete remove_actor_pointer;
   }
 
@@ -453,7 +453,7 @@ void GameBall::OnUpdate() {
       auto remove_actor_pointer = actors_.at(actor_id);
       actors_.erase(actor_id);
       // delete actor;
-      if (!remove_actor_pointer)
+      if (remove_actor_pointer)
         delete remove_actor_pointer;
     }
 
