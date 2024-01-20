@@ -27,10 +27,6 @@ uint64_t World::CreateSphere(float radius, float mass) {
   return id;
 }
 
-void World::DeleteSphere(uint64_t id) {
-  spheres_.erase(id);
-}
-
 uint64_t World::CreateCube(float side_length, float mass) {
   uint64_t id = next_cube_id_++;
   cubes_.emplace(id, Cube(mass, side_length));

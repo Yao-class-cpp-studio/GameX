@@ -13,8 +13,6 @@ class World {
 
   uint64_t CreateSphere(float radius = 1.0f, float mass = 1.0f);
 
-  void DeleteSphere(uint64_t id);
-
   uint64_t CreateCube(float side_length = 1.0f, float mass = 1.0f);
 
   Sphere &GetSphere(uint64_t id);
