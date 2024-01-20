@@ -10,8 +10,8 @@ const int MAX_PLAYER = 5;
 #include <tuple>
 
 #ifdef _WIN32
-#include <WS2tcpip.h>
-#include <WinSock2.h>
+#include <Ws2tcpip.h>
+#include <winsock2.h>
 #include <iphlpapi.h>
 
 #include <thread>
