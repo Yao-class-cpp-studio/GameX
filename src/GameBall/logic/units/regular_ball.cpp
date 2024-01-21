@@ -2,19 +2,15 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
-<<<<<<< Updated upstream
 namespace GameBall::Logic::Units {
-=======
-//#include<termios.h>
-//#include<unistd.h>
-#include<windows.h>
-
+#include<termios.h>
+#include<unistd.h>
+  
 namespace GameBall::Logic::Units {
 short count_fallen=0;//count how many times R is pressed.
 //count how many balls have fallen
 float Y1=0.0f;//record the position of the enemy spheres
 const short number_of_balls = 3;
->>>>>>> Stashed changes
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
                          const glm::vec3 &position,
@@ -88,11 +84,6 @@ void RegularBall::UpdateTick() {
           sphere.angular_velocity +=
               moving_direction * angular_acceleration * delta_time;
         }
-<<<<<<< Updated upstream
-  
-        if (input.brake) {
-          sphere.angular_velocity = glm::vec3{0.0f};
-        }
       }
     }
 
@@ -103,7 +94,6 @@ void RegularBall::UpdateTick() {
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
-=======
         if (input.brake && std::abs(sphere.velocity.y) >= 0.01f) {
           sphere.angular_velocity = glm::vec3{0.0f};
         }
@@ -148,16 +138,11 @@ void RegularBall::UpdateTick() {
           }
           std::cout << "______________Halting______________\n";
           std::cout << "Please enter a 4-digit password:\n";
-          /*termios oldt;
+          termios oldt;
           tcgetattr(STDIN_FILENO, &oldt);
           termios newt=oldt;
           newt.c_lflag &= ~ECHO;
           tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-          */
-          HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
-          DWORD mode = 0;
-          GetConsoleMode(hStdin, &mode);
-          SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
           std::string password, enter;
           char p;
           int length = 4;
@@ -170,15 +155,15 @@ void RegularBall::UpdateTick() {
             std::cin >> enter;
             if (enter == password) {
               input.halt = false;
-              // tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
               break;
             } else if (i < 2)
               std::cout << "Enter again:\n";
           }
           if (i == 3) {
             std::cout << "Sorry, but we have to stop now.\n";
-            // tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-            Sleep(5000);  // Linux:sleep(5000)
+             tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            sleep(5000);  
             world_->RemovePlayer(owner->PrimaryUnitId());
             exit(0);
           }
@@ -209,7 +194,7 @@ void RegularBall::UpdateTick() {
             sphere.position.x = 20.0f, sphere.position.z = -10.0f;
             world_->RemovePlayer(owner->PrimaryUnitId());
             std::cerr << "You have lost the game!";
-            Sleep(3000);
+            sleep(3000);
             exit(0);
           } else {
             world_->RemovePlayer(player_id_);
@@ -225,13 +210,13 @@ void RegularBall::UpdateTick() {
                  sphere.position.y < -160.0f) {
         world_->RemovePlayer(owner->PrimaryUnitId());
         std::cerr << "You have lost the game!";
-        Sleep(3000);  // sleep(3000);
+        sleep(3000);
         exit(0);
       } else if (Y1 > 0.0f && count_fallen == number_of_balls) {
         sphere.position.y = 31.0f;
         world_->RemovePlayer(owner->PrimaryUnitId());
         std::cerr << "$$$$$$@@@@@@You have won the game!@@@@@@$$$$$$";
-        Sleep(10000);  // sleep(10000);
+        sleep(10000); 
         exit(0);
       }
     }
