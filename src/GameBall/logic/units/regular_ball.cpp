@@ -180,7 +180,7 @@ void RegularBall::UpdateTick() {
   if (owner) {
     if (UnitId() != owner->PrimaryUnitId()) {
       Y1 = sphere.position.y;
-      if (Y1 < 0.50f) {
+      if (Y1 < -160.0f) {
         world_->RemovePlayer(player_id_);
         count_fallen++;
       }
@@ -193,7 +193,7 @@ void RegularBall::UpdateTick() {
         exit(0);
       }
     } else if (Y1 > sphere.position.y + 10.0f&&sphere.position.y>0.99f ||
-               sphere.position.y < 0.0f && count_ret >= 2) {
+               sphere.position.y < -160.0f) {
       world_->RemovePlayer(owner->PrimaryUnitId());
       std::cerr << "You have lost the game!";
       sleep(3000);

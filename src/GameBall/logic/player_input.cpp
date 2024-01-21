@@ -23,8 +23,8 @@ PlayerInput PlayerInputController::GetInput() {
   input_.low = (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS);
   input_.high = (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS);
   input_.return_if_too_light =
-      (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);  // 2 chances of returning to the base
-  //changed to enable the judgement of winning or not.
+      (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS &&
+       count_chances < 2);  // 2 chances of returning to the base
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
     R_pressed_now = R_pressed_before = true;
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE && R_pressed_before &&
