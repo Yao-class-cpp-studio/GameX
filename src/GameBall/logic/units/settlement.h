@@ -38,7 +38,7 @@ void showWindow(std::string str) {
         createWindowAndRunLoop(str);
     });
 }
-#elif
+#else
 void showWindow(std::string str) {
     std::cout << str << std::endl;
 }
