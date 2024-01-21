@@ -91,6 +91,14 @@ class World {
 
   void UpdateTick();
 
+  int restart = 0;
+
+  int score[2] = {0, 0};
+
+  glm::vec3 owner_place = {0.0f, 1.0f, 0.0f};
+
+  int difficulty = 0;
+
  private:
   friend ::GameBall::GameBall;
   friend ::GameBall::Logic::Manager;
