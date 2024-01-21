@@ -1,6 +1,7 @@
+#include <string>
+#ifdef __APPLE__
 #include <GLFW/glfw3.h>
 #include <dispatch/dispatch.h>
-#include <string>
 
 void renderLoop(GLFWwindow* window) {
     // Set the start time
@@ -37,3 +38,8 @@ void showWindow(std::string str) {
         createWindowAndRunLoop(str);
     });
 }
+#elif
+void showWindow(std::string str) {
+    std::cout << str << std::endl;
+}
+#endif
