@@ -23,6 +23,14 @@ class PlayerInputController {
  private:
   GameBall *app_;
   PlayerInput input_{};
+<<<<<<< Updated upstream
+=======
+  bool R_pressed_before = false;  // indicate whether R has been pressed before
+  bool R_pressed_now = false;
+  bool T_pressed_before = false;
+  bool T_pressed_now = false;
+  int count_chances = 0, count_halt = 0;
+>>>>>>> Stashed changes
 };
 
 }  // namespace GameBall::Logic

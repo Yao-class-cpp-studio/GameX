@@ -37,10 +37,23 @@ void GameBall::OnInit() {
 
   auto primary_player = world->CreatePlayer();
   auto enemy_player = world->CreatePlayer();
+<<<<<<< Updated upstream
+=======
+  auto small_player = world->CreatePlayer();
+  auto large_player = world->CreatePlayer();
+>>>>>>> Stashed changes
   auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
       primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
+<<<<<<< Updated upstream
       enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+=======
+      enemy_player->PlayerId(), glm::vec3{0.0f, 21.0f, -20.0f}, 1.0f, 1.0f);
+  auto small_unit = world->CreateUnit<Logic::Units::RegularBall>(
+      small_player->PlayerId(), glm::vec3{-12.7f, 0.7f, 20.0f}, 0.7f, 0.343f);
+  auto large_unit = world->CreateUnit<Logic::Units::RegularBall>(
+      large_player->PlayerId(), glm::vec3{0.0f, 22.0f, 20.0f}, 2.0f, 6.0f);
+>>>>>>> Stashed changes
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
       glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 20.0f);

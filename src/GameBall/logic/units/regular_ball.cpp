@@ -2,7 +2,19 @@
 
 #include "GameBall/core/game_ball.h"
 #include "GameBall/logic/world.h"
+<<<<<<< Updated upstream
 namespace GameBall::Logic::Units {
+=======
+//#include<termios.h>
+//#include<unistd.h>
+#include<windows.h>
+
+namespace GameBall::Logic::Units {
+short count_fallen=0;//count how many times R is pressed.
+//count how many balls have fallen
+float Y1=0.0f;//record the position of the enemy spheres
+const short number_of_balls = 3;
+>>>>>>> Stashed changes
 RegularBall::RegularBall(World *world,
                          uint64_t player_id,
                          const glm::vec3 &position,
@@ -76,6 +88,7 @@ void RegularBall::UpdateTick() {
           sphere.angular_velocity +=
               moving_direction * angular_acceleration * delta_time;
         }
+<<<<<<< Updated upstream
   
         if (input.brake) {
           sphere.angular_velocity = glm::vec3{0.0f};
@@ -90,6 +103,140 @@ void RegularBall::UpdateTick() {
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
+=======
+        if (input.brake && std::abs(sphere.velocity.y) >= 0.01f) {
+          sphere.angular_velocity = glm::vec3{0.0f};
+        }
+
+        if (input.low) {
+          sphere.mass *= 0.9f;
+        }
+
+        if (input.high && std::abs(sphere.position.x) < 5.0f &&
+            std::abs(sphere.position.z) < 5.0f &&
+            std::abs(sphere.position.y - 1.0f) < 0.01f) {
+          sphere.mass *= 1.1f;
+        }
+        if (input.v_jump) {
+          if (std::abs(sphere.position.y - 1.0f) < 0.01f ||
+              std::abs(sphere.position.y - 21.0f) < 0.01f ||
+              (std::abs(sphere.position.y - 7.0f) < 0.01f &&
+               std ::abs(sphere.position.z) < 2.25f &&
+               std::abs(sphere.position.x + 35.0f) < 2.25f))
+            sphere.velocity.y = 10.0f;
+        }
+        if (input.return_if_too_light) {
+          if (sphere.mass <= 0.50f) {
+            sphere.position.y = 1.00f;
+            sphere.position.x = 0.00f;
+            sphere.position.z = 0.00f;
+            sphere.mass = 1.0f;
+          }
+        }
+
+        if (input.end_if_too_heavy && sphere.mass >= 2.0f) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
+          exit(0);
+        }
+        if (input.halt) {
+          std::cout << "Exit?(Y/n)\n";
+          char c;
+          std::cin >> c;
+          if (c == 'Y' || c == 'y') {
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            exit(0);  // This exit is more stable
+          }
+          std::cout << "______________Halting______________\n";
+          std::cout << "Please enter a 4-digit password:\n";
+          /*termios oldt;
+          tcgetattr(STDIN_FILENO, &oldt);
+          termios newt=oldt;
+          newt.c_lflag &= ~ECHO;
+          tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+          */
+          HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+          DWORD mode = 0;
+          GetConsoleMode(hStdin, &mode);
+          SetConsoleMode(hStdin, mode & (~ENABLE_ECHO_INPUT));
+          std::string password, enter;
+          char p;
+          int length = 4;
+          for (int i = 0; i < length; i++)
+            std::cin >> p, password += p;
+          std::cout << "Successfully memorized password, enter again to "
+                       "restart the game:\n";
+          int i;
+          for (i = 0; i < 3; i++) {
+            std::cin >> enter;
+            if (enter == password) {
+              input.halt = false;
+              // tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+              break;
+            } else if (i < 2)
+              std::cout << "Enter again:\n";
+          }
+          if (i == 3) {
+            std::cout << "Sorry, but we have to stop now.\n";
+            // tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            Sleep(5000);  // Linux:sleep(5000)
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            exit(0);
+          }
+        }
+        if (input.end) {
+          world_->RemovePlayer(owner->PrimaryUnitId());
+          exit(0);
+        }
+      } else {
+        glm::vec3 zero_v{0.0f};
+        sphere.velocity = zero_v;
+        sphere.angular_velocity *= 0;
+      }
+    }
+    sphere.velocity *= std::pow(0.5f, delta_time);
+    sphere.angular_velocity *= std::pow(0.2f, delta_time);
+
+    position_ = sphere.position;
+    velocity_ = sphere.velocity;
+    orientation_ = sphere.orientation;
+    augular_momentum_ = sphere.inertia * sphere.angular_velocity;
+
+    if (owner) {
+      if (UnitId() != owner->PrimaryUnitId()) {
+        Y1 = sphere.position.y;
+        if (Y1 < -160.0f)
+          if (UnitId() == owner->SmallUnitId()) {
+            sphere.position.x = 20.0f, sphere.position.z = -10.0f;
+            world_->RemovePlayer(owner->PrimaryUnitId());
+            std::cerr << "You have lost the game!";
+            Sleep(3000);
+            exit(0);
+          } else {
+            world_->RemovePlayer(player_id_);
+            count_fallen++;
+          }
+        if (UnitId() == owner->SmallUnitId() && sphere.position.x <= -32.75f &&
+            sphere.position.x >= -37.25f &&
+            std::abs(sphere.position.z) <= 2.25f) {
+          world_->RemovePlayer(owner->SmallUnitId());
+          count_fallen++;
+        }
+      } else if (Y1 > sphere.position.y + 10.0f && sphere.position.y > 0.99f ||
+                 sphere.position.y < -160.0f) {
+        world_->RemovePlayer(owner->PrimaryUnitId());
+        std::cerr << "You have lost the game!";
+        Sleep(3000);  // sleep(3000);
+        exit(0);
+      } else if (Y1 > 0.0f && count_fallen == number_of_balls) {
+        sphere.position.y = 31.0f;
+        world_->RemovePlayer(owner->PrimaryUnitId());
+        std::cerr << "$$$$$$@@@@@@You have won the game!@@@@@@$$$$$$";
+        Sleep(10000);  // sleep(10000);
+        exit(0);
+      }
+    }
+  }
+>>>>>>> Stashed changes
 }
 
 void RegularBall::SetMass(float mass) {
