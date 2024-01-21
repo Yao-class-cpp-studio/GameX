@@ -37,17 +37,47 @@ void GameBall::OnInit() {
 
   auto primary_player = world->CreatePlayer();
   auto enemy_player = world->CreatePlayer();
+  auto large_player = world->CreatePlayer();
+  auto small_player = world->CreatePlayer();
   auto primary_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      primary_player->PlayerId(), glm::vec3{0.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+      primary_player->PlayerId(), glm::vec3{20.0f, 21.0f, 0.0f}, 1.0f, 1.0f);
   auto enemy_unit = world->CreateUnit<Logic::Units::RegularBall>(
-      enemy_player->PlayerId(), glm::vec3{-5.0f, 1.0f, 0.0f}, 1.0f, 1.0f);
+      enemy_player->PlayerId(), glm::vec3{0.0f, 21.0f, -20.0f}, 1.0f, 1.0f);
+  auto large_unit = world->CreateUnit<Logic::Units::RegularBall>(
+      large_player->PlayerId(), glm::vec3{-30.0f, 2.0f, 0.0f}, 2.0f, 6.0f);
+  auto small_unit = world->CreateUnit<Logic::Units::RegularBall>(
+      small_player->PlayerId(), glm::vec3{0.0f, 20.7f, 20.0f}, 0.7f, 0.343f);
   auto primary_obstacle = world->CreateObstacle<Logic::Obstacles::Block>(
-      glm::vec3{0.0f, -10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
+      glm::vec3{0.0f, -40.0f, 0.0f}, std::numeric_limits<float>::infinity(),
+      false, 80.0f);
+  auto obstacle2 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{20.0f, 10.0f, 0.0f}, std::numeric_limits<float>::infinity(),
       false, 20.0f);
-
+  auto obstacle3 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{0.0f, 10.0f, 20.0f}, std::numeric_limits<float>::infinity(),
+      false, 20.0f);
+  auto obstacle4 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{0.0f, 10.0f, -20.0f}, std::numeric_limits<float>::infinity(),
+      false, 20.0f);
+  auto obstacle5 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{-35.0f, 0.75f, 1.5f}, std::numeric_limits<float>::infinity(),
+      false, 1.5f);
+  auto obstacle6 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{-35.0f, 0.75f, -1.5f}, std::numeric_limits<float>::infinity(),
+      false, 1.5f);
+  auto obstacle7 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{-35.0f, 3.75f, 0.0f}, std::numeric_limits<float>::infinity(),
+      false, 4.5f);
+  auto obstacle8 = world->CreateObstacle<Logic::Obstacles::Block>(
+      glm::vec3{15.0f, 15.0f, 15.0f}, std::numeric_limits<float>::infinity(),
+      false, 10.0f);
   primary_player_id_ = primary_player->PlayerId();
+  large_player_id_ = large_player->PlayerId();
+  small_player_id_ = small_player->PlayerId();
 
   primary_player->SetPrimaryUnit(primary_unit->UnitId());
+  large_player->SetLargeUnit(large_unit->UnitId());
+  small_player->SetSmallUnit(small_unit->UnitId());
 
   VkExtent2D extent = FrameExtent();
   float aspect = static_cast<float>(extent.width) / extent.height;

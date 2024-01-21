@@ -3,12 +3,57 @@
 #include "GameBall/core/game_ball.h"
 
 namespace GameBall::Actors {
-
+static int count = 1;
 CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
   entity_ = app->Scene()->CreateEntity(
       app->AssetManager()->StaticModelFile("models/sphere.obj"));
-  entity_->SetAlbedoImage(
-      app->AssetManager()->ImageFile("textures/2k_moon.jpg"));
+  if (count == 1)
+    std::cout << "Choose the color of the player ball:";
+  else if (count == 2)
+    std::cout << "Choose the color of the enemy ball:";
+  else if (count == 3)
+    std::cout << "Choose the color of the large ball:";
+  else if (count == 4)
+    std::cout << "Choose the color of the small ball:";
+  else
+    exit(0);
+  std::string enter;
+  while (1) {
+    std::cin >> enter;
+    if (enter == "white") {
+      entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+          "textures/floor_tiles_06_2k/floor_tiles_06_ao_2k.jpg"));
+      break;
+    } else if (enter == "orange") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+          "textures/floor_tiles_06_2k/floor_tiles_06_arm_2k.jpg"));
+      break;
+    } else if (enter == "tile") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+          "textures/floor_tiles_06_2k/floor_tiles_06_disp_2k.jpg"));
+            break;
+    } else if (enter == "blue1") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+                "textures/floor_tiles_06_2k/floor_tiles_06_nor_dx_2k.jpg"));
+            break;
+    } else if (enter == "blue2") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+                "textures/floor_tiles_06_2k/floor_tiles_06_nor_gl_2k.jpg"));
+            break;
+    } else if (enter == "grey") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile("textures/floor_tiles_06_2k/floor_tiles_06_rough_2k.jpg "));
+            break;
+    } else if (enter == "Moon") {
+            entity_->SetAlbedoImage(app->AssetManager()->ImageFile(
+                "textures/2k_moon.jpg"));
+            break;
+    } else {
+            std::cout<<
+                "We only have 7 textures, namely blue1, blue2, "<<
+                "white, orange, tile, grey, and Moon. Please choose again.\n";
+    } 
+  }
+  count++;
 }
 
 CommonBallActor::~CommonBallActor() {

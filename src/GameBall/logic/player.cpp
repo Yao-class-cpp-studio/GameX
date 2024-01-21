@@ -20,8 +20,24 @@ uint64_t Player::PrimaryUnitId() const {
   return primary_unit_id_;
 }
 
+uint64_t Player::LargeUnitId() const {
+  return large_unit_id_;
+} 
+
+uint64_t Player::SmallUnitId() const {
+  return small_unit_id_;
+}
+
 void Player::SetPrimaryUnit(uint64_t unit_id) {
   primary_unit_id_ = unit_id;
+}
+
+void Player::SetLargeUnit(uint64_t unit_id) {
+  large_unit_id_ = unit_id;
+}
+
+void Player::SetSmallUnit(uint64_t unit_id) {
+  small_unit_id_ = unit_id;
 }
 
 void Player::SetInput(const PlayerInput &input) {
