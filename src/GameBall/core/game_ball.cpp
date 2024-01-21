@@ -52,7 +52,6 @@ void GameBall::receivePackets() {
         continue;
       }
 
-      // Split the msg, and check if the command is quit.
       size_t pos = msg.find(':');
       if (!(pos != std::string::npos && pos > 0 &&
             std::all_of(msg.begin(), msg.begin() + pos, ::isdigit))) {
@@ -61,30 +60,29 @@ void GameBall::receivePackets() {
       uint64_t id = std::stoull(msg.substr(0, pos));
       std::string command = msg.substr(pos + 1);
 
-      // (A Open Bug) TODO: Fix the bug of client quit
-      // GameX still not have a proper scheme to
-      // erase the ball picture when the client quit.
-      // So we just remove the ball from the world.
-      // without cleaning picture.
-      // Hope someone can fix this in the future.
-
       if (command == "quit") {
         {
-          std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
+          // I have no idea why comment this line will make seg_fault disappear.
+          // std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
 
           remove_queue.push(id);
-          world_->game_node_.send("Bye", c_ip, c_port);
+          // world_->game_node_.send("Bye", c_ip, c_port);
+          for (auto &player : world_->player_map_) {
+            if (player.second->PlayerId() != id) {
+              world_->game_node_.send(msg,
+                                      player.second->GetIp(),
+                                      player.second->GetPort());
+            }
+          }
         }
         continue;
       }
 
-      // If the command is not quit, then it is a sync of user input, just push
-      // it to the input queue.
       InputPacket inputPacket;
       inputPacket.player_id = id;
       inputPacket.input = StringToPlayerInput(command);
       {
-        std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
+        // std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
         input_queue.push(inputPacket);
       }
     }
@@ -97,6 +95,30 @@ void GameBall::receivePackets() {
     std::cout << "Client started." << std::endl;
     while (is_running) {
       auto [msg, c_ip, c_port] = world_->game_node_.receive();
+
+      // Quit Handle
+
+      size_t pos = msg.find(':');
+      if (!(pos != std::string::npos && pos > 0 &&
+            std::all_of(msg.begin(), msg.begin() + pos, ::isdigit))) {
+        continue;
+      }
+      uint64_t id = std::stoull(msg.substr(0, pos));
+      std::string command = msg.substr(pos + 1);
+
+      if (command == "quit") {
+        {
+          // std::lock_guard<std::mutex> lock(logic_manager_->logic_mutex_);
+          if (room_id_to_client_id.find(id) != room_id_to_client_id.end()) {
+            auto real_id = room_id_to_client_id.at(id);
+            remove_queue.push(real_id);
+          }
+        }
+        continue;
+      }
+
+      //
+
       std::map<uint64_t, bool> valid_ball_map;
 
       valid_ball_map[primary_player_id_] = true;
@@ -149,10 +171,11 @@ void GameBall::receivePackets() {
 
       // Check for lost ball by going through the video
 
-      for (auto &pair : video_stream_map) {
-        auto player = world_->GetPlayer(pair.first);
-        if (!valid_ball_map[pair.first]) {
-          // Clear the ball!
+      /*auto &map_of_player = world_->player_map_;
+      for(auto &pair : map_of_player) {
+        auto player_id = pair.first;
+        auto player = pair.second;
+        if (valid_ball_map.find(player_id) == valid_ball_map.end()) {
           video_stream_map.erase(player->PlayerId());
           for (auto it = room_id_to_client_id.begin();
                it != room_id_to_client_id.end();) {
@@ -163,10 +186,10 @@ void GameBall::receivePackets() {
             }
           }
           auto remove_unit_id = player->PrimaryUnitId();
-          world_->RemovePlayer(player->PlayerId());
-          world_->RemoveUnit(remove_unit_id);
+          remove_queue.push(player->PlayerId());
+          valid_ball_map[player_id] = false;
         }
-      }
+      }*/
     }
     std::cout << "Client stopped." << std::endl;
   }
@@ -193,7 +216,7 @@ void GameBall::OnInit() {
 
   if (settings_.mode == "client") {
     world->game_node_.is_server = false;
-    world->game_node_.initialize(DEFAULT_PORT + 1);
+    world->game_node_.initialize(settings_.res_port);
 
   } else if (settings_.mode == "room") {
     world->game_node_.is_server = true;
@@ -293,6 +316,24 @@ void GameBall::OnInit() {
 }
 
 void GameBall::OnCleanup() {
+  is_running = false;
+
+  // Wait for all operations to complete
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  while (!input_queue.empty() || !remove_queue.empty()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+
+  if (listen_thread.joinable()) {
+    listen_thread.join();
+  }
+
+  if (settings_.mode == "client") {
+    auto world = logic_manager_->World();
+    world->game_node_.send(std::to_string(data_id) + ":quit", settings_.address,
+                           settings_.port);
+  }
+
   logic_manager_->Stop();
   std::queue<uint64_t> actors_to_remove;
 
@@ -308,18 +349,6 @@ void GameBall::OnCleanup() {
     actors_.erase(actor_id);
     if (remove_actor_pointer)
       delete remove_actor_pointer;
-  }
-
-  is_running = false;
-  if (listen_thread.joinable()) {
-    listen_thread.join();
-  }
-
-  if (settings_.mode == "client") {
-    auto world = logic_manager_->World();
-    ;
-    world->game_node_.send(std::to_string(data_id) + ":quit", settings_.address,
-                           settings_.port);
   }
 }
 
@@ -371,21 +400,21 @@ void GameBall::OnUpdate() {
       }
     }
 
+    while (!remove_queue.empty()) {
+      auto remove_player_id = remove_queue.front();
+      auto remove_unit_id =
+          logic_manager_->world_->GetPlayer(remove_player_id)
+              ->PrimaryUnitId();
+      remove_queue.pop();
+      logic_manager_->world_->RemovePlayer(remove_player_id);
+      logic_manager_->world_->RemoveUnit(remove_unit_id);
+
+      std::cout << "Player " << remove_player_id << " quit." << std::endl;
+    }
+
     if (settings_.mode == "room") {
       float ball_data[48];
       std::string msg_broadcast;
-
-      while (!remove_queue.empty()) {
-        auto remove_player_id = remove_queue.front();
-        auto remove_unit_id =
-            logic_manager_->world_->GetPlayer(remove_player_id)
-                ->PrimaryUnitId();
-        remove_queue.pop();
-        logic_manager_->world_->RemovePlayer(remove_player_id);
-        logic_manager_->world_->RemoveUnit(remove_unit_id);
-
-        std::cout << "Player " << remove_player_id << " quit." << std::endl;
-      }
 
       auto &client_list = logic_manager_->world_->player_map_;
 

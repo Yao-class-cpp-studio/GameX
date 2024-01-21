@@ -15,6 +15,7 @@ struct ApplicationSettings {
   std::string mode;
   std::string address;
   int port{DEFAULT_PORT};
+  int res_port{DEFAULT_PORT + 1};
 };
 
 class Application {

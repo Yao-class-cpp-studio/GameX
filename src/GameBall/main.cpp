@@ -15,6 +15,7 @@ ABSL_FLAG(int, height, -1, "Height of the window.");
 ABSL_FLAG(std::string, mode, "", "Game mode");
 ABSL_FLAG(std::string, address, "", "Server address");
 ABSL_FLAG(int, port, DEFAULT_PORT, "Server Port");
+ABSL_FLAG(int, res_port, DEFAULT_PORT + 1, "Reserved Port");
 
 uint8_t app_type;
 // 0: room, 1: client, 2: local
@@ -29,6 +30,7 @@ int main(int argc, char *argv[]) {
   settings.mode = absl::GetFlag(FLAGS_mode);
   settings.address = absl::GetFlag(FLAGS_address);
   settings.port = absl::GetFlag(FLAGS_port);
+  settings.res_port = absl::GetFlag(FLAGS_res_port);
 
   if (settings.mode == "room") {
     app_type = 0;
