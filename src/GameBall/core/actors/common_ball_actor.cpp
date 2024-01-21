@@ -7,10 +7,8 @@ namespace GameBall::Actors {
 CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
   entity_ = app->Scene()->CreateEntity(
       app->AssetManager()->StaticModelFile("models/sphere.obj"));
-<<<<<<< Updated upstream
   entity_->SetAlbedoImage(
       app->AssetManager()->ImageFile("textures/2k_moon.jpg"));
-=======
   if (count == 1)
     std::cout << "Choose the color of the player ball:";
   else if (count == 2)
@@ -58,7 +56,6 @@ CommonBallActor::CommonBallActor(GameBall *app) : Actor(app) {
     } 
   }
   count++;
->>>>>>> Stashed changes
 }
 
 CommonBallActor::~CommonBallActor() {
