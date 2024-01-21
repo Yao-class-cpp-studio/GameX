@@ -55,7 +55,7 @@ class P2PNode {
  public:
   P2PNode();
 
-  void initialize(u_int8_t port);
+  void initialize(uint8_t port);
 
   bool isInited() const;
 
