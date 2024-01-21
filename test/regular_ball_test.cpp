@@ -6,6 +6,8 @@
 #include "GameBall/logic/obstacles/obstacles.h"
 #include "GameBall/logic/units/units.h"
 
+uint8_t app_type;
+
 void TestPlayerInput(GameBall::Logic::PlayerInput input,
                      glm::vec3 expected_position) {
   GameBall::Logic::World world;
@@ -55,6 +57,7 @@ void TestPlayerInput(GameBall::Logic::PlayerInput input,
 }
 
 TEST(RegularBall, Functional) {
+  app_type = 0;
   std::random_device rd;
   std::mt19937 gen(rd());
   for (int i = 0; i < 100; i++) {

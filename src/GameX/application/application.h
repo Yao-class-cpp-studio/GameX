@@ -4,12 +4,18 @@
 #include "GameX/renderer/renderer.h"
 #include "GameX/utils/utils.h"
 
+#define DEFAULT_PORT 1115
+
 namespace GameX::Base {
 
 struct ApplicationSettings {
   bool fullscreen{false};
   int width{-1};
   int height{-1};
+  std::string mode;
+  std::string address;
+  int port{DEFAULT_PORT};
+  int res_port{DEFAULT_PORT + 1};
 };
 
 class Application {

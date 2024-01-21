@@ -4,7 +4,7 @@
 
 namespace GameBall::Logic {
 
-Player::Player(World *world) : world_(world) {
+Player::Player(World *world) : world_(world), port_(DEFAULT_PORT) {
   player_id_ = world_->RegisterPlayer(this);
 }
 
@@ -36,5 +36,18 @@ PlayerInput Player::TakePlayerInput() {
   auto input = input_;
   input_ = {};
   return input;
+}
+
+const std::string &Player::GetIp() const {
+  return ip_;
+}
+
+const uint16_t &Player::GetPort() const {
+  return port_;
+}
+
+void Player::SetNetInfo(const std::string &ip, const uint16_t &port) {
+  ip_ = ip;
+  port_ = port;
 }
 }  // namespace GameBall::Logic

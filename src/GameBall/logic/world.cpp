@@ -2,6 +2,8 @@
 
 #include "GameBall/core/game_ball.h"
 
+extern uint8_t app_type;
+
 namespace GameBall::Logic {
 
 World::World() {
@@ -76,16 +78,19 @@ void World::UnregisterPlayer(uint64_t player_id) {
 
 void World::UpdateTick() {
   // LAND_INFO("Update Tick... {}", world_version_);
-
-  physics_world_->ApplyGravity(TickDeltaT());
-
-  physics_world_->SolveCollisions();
+  if (app_type != 1) {
+    physics_world_->ApplyGravity(TickDeltaT());
+    physics_world_->SolveCollisions();
+  }
 
   for (auto &pair : object_map_) {
     pair.second->UpdateTick();
   }
 
-  physics_world_->SolveCollisions();
+  if (app_type != 1) {
+    physics_world_->SolveCollisions();
+  }
+
   physics_world_->Update(TickDeltaT());
 
   world_version_++;

@@ -20,6 +20,12 @@ class Player {
 
   PlayerInput TakePlayerInput();
 
+  const std::string &GetIp() const;
+
+  const uint16_t &GetPort() const;
+
+  void SetNetInfo(const std::string &ip, const uint16_t &port);
+
  private:
   World *world_;
   uint64_t player_id_{};
@@ -27,5 +33,9 @@ class Player {
   uint64_t primary_unit_id_{};
 
   PlayerInput input_{};
+
+  std::string ip_;
+
+  uint16_t port_;
 };
 }  // namespace GameBall::Logic

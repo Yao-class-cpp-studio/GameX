@@ -1,8 +1,11 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <queue>
+#include <sstream>
 
+#include "GameBall/core/p2pnode.h"
 #include "GameBall/core/utils.h"
 #include "GameBall/logic/object.h"
 #include "GameBall/logic/obstacle.h"
@@ -90,6 +93,8 @@ class World {
   }
 
   void UpdateTick();
+
+  P2PNode game_node_;
 
  private:
   friend ::GameBall::GameBall;
