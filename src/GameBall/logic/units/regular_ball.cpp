@@ -80,9 +80,23 @@ void RegularBall::UpdateTick() {
       if (input.brake) {
         sphere.angular_velocity = glm::vec3{0.0f};
       }
+
+      if (input.accelerate) {
+        sphere.angular_velocity += sphere.angular_velocity * delta_time * 3.6f;
+      }
+      if (input.decelerate) {
+        sphere.angular_velocity -= sphere.angular_velocity * delta_time * 7.2f;
+      }
+      if (input.remake) {
+          sphere.position = glm::vec3{0.0f, 1.0f, 0.0f};
+          sphere.velocity = glm::vec3{0.0f}; 
+      }
+
     }
+
   }
 
+ 
   sphere.velocity *= std::pow(0.5f, delta_time);
   sphere.angular_velocity *= std::pow(0.2f, delta_time);
 
@@ -90,6 +104,7 @@ void RegularBall::UpdateTick() {
   velocity_ = sphere.velocity;
   orientation_ = sphere.orientation;
   augular_momentum_ = sphere.inertia * sphere.angular_velocity;
+
 }
 
 void RegularBall::SetMass(float mass) {
