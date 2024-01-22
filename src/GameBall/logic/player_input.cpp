@@ -1,18 +1,21 @@
 #include "GameBall/logic/player_input.h"
 
 #include "GameBall/core/game_ball.h"
-
 namespace GameBall::Logic {
 PlayerInputController::PlayerInputController(GameBall *app) : app_(app) {
 }
-
 PlayerInput PlayerInputController::GetInput() {
   auto window = app_->Window();
+  if(glfwGetKey(window,GLFW_KEY_Q)==GLFW_PRESS)exit(0);
   input_.move_forward = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
   input_.move_backward = (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
   input_.move_left = (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
   input_.move_right = (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
   input_.brake = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+  input_.copy=(glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
+  input_.freecamera = (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS);
+  input_.jump=(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
+  input_.rotate=(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS);
   auto camera_controller = app_->CameraController();
   auto pitch_yaw = camera_controller->GetPitchYaw();
   auto pitch = pitch_yaw.x;
