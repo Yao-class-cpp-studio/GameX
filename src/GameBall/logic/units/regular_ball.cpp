@@ -39,7 +39,7 @@ SYNC_ACTOR_FUNC(RegularBall) {
   actor->SetMotion(position_, velocity_, orientation_, augular_momentum_);
   actor->SetMomentOfInertia(sphere.inertia[0][0]);
 }
-
+static bool copy_flag,last_copy_flag;
 void RegularBall::UpdateTick() {
   float delta_time = world_->TickDeltaT();
   auto physics_world = world_->PhysicsWorld();
@@ -70,6 +70,10 @@ void RegularBall::UpdateTick() {
        if (input.move_right) {
          moving_direction += forward;
        }
+	   if (input.rotate)
+	   {
+		   moving_direction += glm::vec3{0.0f,0.1f,0.0f};
+	   }
   
        if (glm::length(moving_direction) > 0.0f) {
          moving_direction = glm::normalize(moving_direction);
@@ -78,13 +82,20 @@ void RegularBall::UpdateTick() {
        }
   
        if (input.brake) {
-         sphere.angular_velocity = glm::vec3{0.0f};
+         sphere.angular_velocity/=1.5;
        }
+	   if(input.copy&&!copy_flag&&!last_copy_flag)
+	   {
+		   world_->CreateUnit<Logic::Units::RegularBall>(0,sphere.position,sphere.radius,sphere.mass);
+	   }
+	   last_copy_flag=copy_flag;
+	   copy_flag=input.copy;
+	   if(input.jump)sphere.velocity+=glm::vec3{0.0f,2.0f,0.0f};
+	   else sphere.velocity+=glm::vec3{0.0f,-0.6f,0.0f};
      }
    }
-
-  sphere.velocity *= std::pow(0.5f, delta_time);
-  sphere.angular_velocity *= std::pow(0.2f, delta_time);
+  sphere.velocity *= std::pow(0.8f, delta_time);
+  sphere.angular_velocity *= std::pow(0.5f, delta_time);
 
   position_ = sphere.position;
   velocity_ = sphere.velocity;
