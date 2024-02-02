@@ -6,7 +6,7 @@
 
 namespace GameX::Base {
 
-struct ApplicationSettings {
+struct  ApplicationSettings {
   bool fullscreen{false};
   int width{-1};
   int height{-1};
